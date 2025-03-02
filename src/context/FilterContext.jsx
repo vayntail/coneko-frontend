@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 // Mock Data, replace when backEnd API is running
 import {
@@ -36,14 +36,133 @@ export const FilterProvider = ({ children }) => {
   // Search term for text search
   const [searchTerm, setSearchTerm] = useState("");
 
-  //Todo import mock data (will eventually swap with backEnd API's)
-  const sampleOptions = {
-    platformOptions: [
-      { value: "pc", label: "PC" },
-      { value: "ps5", label: "PlayStation 5" },
-      { value: "xbox", label: "Xbox" },
-    ],
-    // Add similar sample options for other filters
+  //State for all sessions and filtered sessions
+  const [allSessions, setAllSessions] = useState([]);
+  const [filteredSessions, setFilteredSessions] = useState([]);
+
+  //State for loading status
+  const [isLoading, setIsLoading] = useState(true);
+
+  //Load Mock game session data
+  useEffect(() => {
+    // (Todo replace with backend API)
+    const loadMockData = async () => {
+      try {
+        setIsLoading(true);
+
+        //import Mock game session data
+        const module = await import("../assets/mockData/gameSessions");
+        const sessions = module.default;
+
+        setAllSessions(sessions);
+        setFilteredSessions(sessions); //Start with all sessions
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error(`Failed to load mock data`, error);
+        setIsLoading(false);
+      }
+    };
+
+    loadMockData();
+  }, []);
+
+  //Apply filters whenever any filter changes
+  useEffect(() => {
+    applyFilters();
+  }, [
+    platforms,
+    genres,
+    regions,
+    groupSize,
+    customTags,
+    searchTerm,
+    allSessions,
+  ]);
+
+  /**
+   * Function to apply all filters to the sessions
+   * This runs whenever any filter criteria changes (Another option is chosen or removed)
+   */
+
+  const applyFilters = () => {
+    //If no data loaded yet, do nothing
+    if (allSessions.length === 0) return;
+
+    //Start with all sessions
+    let results = [...allSessions];
+
+    //Platform Filter
+    if (platforms.length > 0) {
+      results = results.filter((session) =>
+        platforms.includes(session.platforms)
+      );
+    }
+
+    // Filter by genres - if any genres are selected
+    // A session matches if it has ANY of the selected genres
+    if (genres.length > 0) {
+      results = results.filter(
+        (session) =>
+          // Check if any of the selected genres are in the session's genres array
+          session.genres &&
+          genres.some((genre) => session.genres.includes(genre))
+      );
+    }
+
+    // Filter by regions - if any regions are selected
+    if (regions.length > 0) {
+      results = results.filter((session) => regions.includes(session.region));
+    }
+
+    // Filter by custom tags - if any custom tags are selected
+    // A session matches if it has ANY of the selected custom tags
+    if (customTags.length > 0) {
+      results = results.filter(
+        (session) =>
+          session.customTags &&
+          customTags.some((tag) => session.customTags.includes(tag))
+      );
+    }
+
+    // Filter by group size - if a group size is selected
+    if (groupSize) {
+      results = results.filter((session) => {
+        // Calculate available slots
+        const availableSlots = session.maxPlayers - session.currentPlayers;
+
+        // Apply different filters based on group size selection
+        switch (groupSize) {
+          case "any":
+            return true; // Match everything
+          case "small":
+            return availableSlots > 0 && availableSlots <= 2;
+          case "medium":
+            return availableSlots > 2 && availableSlots <= 5;
+          case "large":
+            return availableSlots > 5;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Filter by search term - if a search term is entered
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      results = results.filter(
+        (session) =>
+          // Search in title, description, and invite code
+          (session.title && session.title.toLowerCase().includes(term)) ||
+          (session.description &&
+            session.description.toLowerCase().includes(term)) ||
+          (session.inviteCode &&
+            session.inviteCode.toLowerCase().includes(term))
+      );
+    }
+
+    // Update the filtered sessions state
+    setFilteredSessions(results);
   };
 
   // Function to reset all filters to their default state
