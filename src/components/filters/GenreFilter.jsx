@@ -20,3 +20,5 @@ const GenreFilter = () => {
     />
   );
 };
+
+export default GenreFilter;

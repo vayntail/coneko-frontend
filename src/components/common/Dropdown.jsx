@@ -138,7 +138,7 @@ const Dropdown = ({
                   <input
                     type="checkbox"
                     checked={selected.includes(option.value)}
-                    onChange={() => handleSelect(option)} // Handled by onClick on li [can replace ( handleSelect(option) with { for clickable words})]
+                    onChange={() => {}} // Handled by onClick on li [can replace ( handleSelect(option) with {} { for checkbox})]
                     onClick={(e) => e.stopPropagation()} // Prevent double-triggering
                   />
                   {option.label}
