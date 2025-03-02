@@ -1,5 +1,14 @@
 import { createContext, useContext, useState } from "react";
 
+// Mock Data, replace when backEnd API is running
+import {
+  platformOptions,
+  genreOptions,
+  regionOptions,
+  groupSizeOptions,
+  customTagOptions,
+} from "../assets/mockData/filterOptions";
+
 //Context for components to acces the filter state witout prop drilling
 const FilterContext = createContext();
 
@@ -63,8 +72,12 @@ export const FilterProvider = ({ children }) => {
     searchTerm,
     setSearchTerm,
 
-    // Sample options for testing
-    sampleOptions,
+    // Sample options for testing (mock data)
+    platformOptions,
+    genreOptions,
+    regionOptions,
+    groupSizeOptions,
+    customTagOptions,
 
     // Reset function
     resetFilters,

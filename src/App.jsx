@@ -1,6 +1,7 @@
 import TestDropdown from "./components/test/TestDropdown";
 import TestFilterContext from "./components/test/TestFilterContext";
 import { FilterProvider } from "./context/FilterContext";
+import TestPlatformFilter from "./components/test/TestPlatformFilter";
 function App() {
   return (
     <>
@@ -10,6 +11,8 @@ function App() {
       <FilterProvider>
         <TestFilterContext />
       </FilterProvider>
+
+      <TestPlatformFilter />
     </>
   );
 }
