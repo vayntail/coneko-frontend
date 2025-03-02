@@ -1,4 +1,5 @@
-import TestFilterBar from "./components/test/TestFilterBar";
+// import TestFilterBar from "./components/test/TestFilterBar";
+import CompleteFilterSystemTest from "./components/test/CompleteFilterSystemTest";
 
 /* Testing Imports */
 // import TestDropdown from "./components/test/TestDropdown";
@@ -10,7 +11,8 @@ function App() {
   return (
     <>
       <div>Hello World~! go team!</div>
-      <TestFilterBar />
+      {/* <TestFilterBar /> */}
+      <CompleteFilterSystemTest />
     </>
   );
 }

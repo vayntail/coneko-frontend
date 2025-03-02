@@ -92,10 +92,10 @@ export const FilterProvider = ({ children }) => {
     //Start with all sessions
     let results = [...allSessions];
 
-    //Platform Filter
+    //Filter by platforms - if any platforms are selected
     if (platforms.length > 0) {
       results = results.filter((session) =>
-        platforms.includes(session.platforms)
+        platforms.includes(session.platform)
       );
     }
 
@@ -128,19 +128,19 @@ export const FilterProvider = ({ children }) => {
     // Filter by group size - if a group size is selected
     if (groupSize) {
       results = results.filter((session) => {
-        // Calculate available slots
-        const availableSlots = session.maxPlayers - session.currentPlayers;
+        // Get the maximum player capacity
+        const maxCapacity = session.maxPlayers;
 
         // Apply different filters based on group size selection
         switch (groupSize) {
           case "any":
             return true; // Match everything
           case "small":
-            return availableSlots > 0 && availableSlots <= 2;
+            return maxCapacity <= 2; // For small groups (1-2 players)
           case "medium":
-            return availableSlots > 2 && availableSlots <= 5;
+            return maxCapacity > 2 && maxCapacity <= 5; // For medium groups (2-5 players)
           case "large":
-            return availableSlots > 5;
+            return maxCapacity > 5; // For large groups (5+ players)
           default:
             return true;
         }
@@ -152,12 +152,10 @@ export const FilterProvider = ({ children }) => {
       const term = searchTerm.toLowerCase().trim();
       results = results.filter(
         (session) =>
-          // Search in title, description, and invite code
+          // Search in title and description
           (session.title && session.title.toLowerCase().includes(term)) ||
           (session.description &&
-            session.description.toLowerCase().includes(term)) ||
-          (session.inviteCode &&
-            session.inviteCode.toLowerCase().includes(term))
+            session.description.toLowerCase().includes(term))
       );
     }
 
@@ -197,6 +195,11 @@ export const FilterProvider = ({ children }) => {
     regionOptions,
     groupSizeOptions,
     customTagOptions,
+
+    //Session data
+    allSessions,
+    filteredSessions,
+    isLoading,
 
     // Reset function
     resetFilters,

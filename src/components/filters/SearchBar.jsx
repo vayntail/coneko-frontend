@@ -51,7 +51,7 @@ const SearchBar = () => {
 
   const handleClear = () => {
     setInputValue(""); //Clear the input field
-    searchTerm(""); //Clear the actual search term
+    setSearchTerm(""); //Clear the actual search term
   };
 
   return (
