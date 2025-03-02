@@ -1,7 +1,11 @@
+import GamesList from "./components/gameSession/GamesList";
+
 function App() {
   return (
     <>
-      <div>Hello World~! go team!</div>
+      <div>
+        <GamesList />
+      </div>
     </>
   );
 }

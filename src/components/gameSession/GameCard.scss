@@ -1,0 +1,29 @@
+.card {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid black;
+
+  .filter-icons {
+    display: flex;
+    flex-direction: column;
+    width: 20px;
+  }
+
+  .game-img {
+    height: 150px;
+    width: 100px;
+    object-fit: cover;
+  }
+
+  .user-circles {
+    height: 30px;
+  }
+
+  .join-box {
+    width: 200px;
+  }
+}
+
+.flex-horizontal {
+  display: flex;
+}
