@@ -1,3 +1,4 @@
+import Home from "./pages/Home/Home";
 import GameSessionList from "./components/gameSession/GameSessionList";
 // import TestFilterBar from "./components/test/TestFilterBar";
 import CompleteFilterSystemTest from "./components/test/CompleteFilterSystemTest";
@@ -14,6 +15,7 @@ import FilterBar from "./components/filters/FilterBar";
 function App() {
   return (
     <>
+      <Home />
       {/* <TestFilterBar /> */}
       {/* <CompleteFilterSystemTest /> */}
 
