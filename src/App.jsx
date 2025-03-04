@@ -1,6 +1,8 @@
-import GamesList from "./components/gameSession/GamesList";
+import GameSessionList from "./components/gameSession/GameSessionList";
 // import TestFilterBar from "./components/test/TestFilterBar";
 import CompleteFilterSystemTest from "./components/test/CompleteFilterSystemTest";
+import { FilterProvider } from "./context/FilterContext";
+import FilterBar from "./components/filters/FilterBar";
 
 /* Testing Imports */
 // import TestDropdown from "./components/test/TestDropdown";
@@ -12,9 +14,13 @@ import CompleteFilterSystemTest from "./components/test/CompleteFilterSystemTest
 function App() {
   return (
     <>
-      <div>Hello World~! go team!</div>
       {/* <TestFilterBar /> */}
-      <CompleteFilterSystemTest />
+      {/* <CompleteFilterSystemTest /> */}
+
+      <FilterProvider>
+        <FilterBar />
+        <GameSessionList />
+      </FilterProvider>
     </>
   );
 }

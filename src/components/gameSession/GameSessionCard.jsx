@@ -2,7 +2,7 @@ import "./GameCard.scss";
 import placeholderImg from "../../assets/placeholders/placeholder-img.png";
 import UserCircle from "./UserCircle";
 
-const GameCard = (props) => {
+const GameSessionCard = (props) => {
   const onJoinButtonClick = () => {
     console.log("JOINED!");
   };
@@ -47,4 +47,4 @@ const GameCard = (props) => {
   );
 };
 
-export default GameCard;
+export default GameSessionCard;
