@@ -1,3 +1,4 @@
+import GamesList from "./components/gameSession/GamesList";
 // import TestFilterBar from "./components/test/TestFilterBar";
 import CompleteFilterSystemTest from "./components/test/CompleteFilterSystemTest";
 
@@ -7,6 +8,7 @@ import CompleteFilterSystemTest from "./components/test/CompleteFilterSystemTest
 // import { FilterProvider } from "./context/FilterContext";
 // import TestPlatformFilter from "./components/test/TestPlatformFilter";
 // import TestSearchBar from "./components/test/TestSearchBar";
+
 function App() {
   return (
     <>
