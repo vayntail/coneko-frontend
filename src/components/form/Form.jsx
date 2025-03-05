@@ -7,10 +7,10 @@ export default (props) => {
   const [errors, setErrors] = useState({}); // We as users do forever pledge to be idiots, from this day until our last
 
   const handleChange = (e) => {
-    const { name, vlaue } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: vlaue,
+      [name]: value,
     });
   };
 
@@ -37,6 +37,4 @@ export default (props) => {
       <button type="submit">Submit</button>
     </form>
   );
-};
-
 };

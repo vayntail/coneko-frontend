@@ -173,6 +173,49 @@ export const FilterProvider = ({ children }) => {
     setSearchTerm("");
   };
 
+  //=======================================Form Implementation ========================================
+
+  //Function to add a new game session to both context state and localStorage (Intergrating the form...)
+  const addGameSession = (newSession) => {
+    //Formatting the new session data to match application's data structure
+    const formattedSession = {
+      //Each session will have its own unique id (Easist way to create one)
+      id: Date.now(),
+
+      //Spread all properties from the form data
+      ...newSession,
+
+      // Convert string number values to actual numbers
+      currentPlayers: parseInt(newSession.currentPlayers) || 1, //Min amount of players
+      maxPlayers: parseInt(newSession.maxPlayers) || 4, //Default Max players
+
+      //Convert genres string to array if its not already an array
+      genres: Array.isArray(newSession.genres)
+        ? newSession.genres
+        : newSession.genres.split(",").map((g) => g.trim()),
+
+      // Convert customTags string to array if it's not already an array
+      customTags: Array.isArray(newSession.customTags)
+        ? newSession.customTags
+        : newSession.customTags.split(",").map((t) => t.trim()),
+    };
+
+    // Save to localStorage (maintaining existing functionality)
+    // This will be replaced with API calls when the backend is implemented
+    const existingSessions =
+      JSON.parse(localStorage.getItem("gameSessions")) || [];
+    localStorage.setItem(
+      "gameSessions",
+      JSON.stringify([...existingSessions, formattedSession])
+    );
+
+    // Add to our application state managed by FilterContext
+    // This will cause any components using this data to re-render
+    setAllSessions((prevSessions) => [...prevSessions, formattedSession]);
+  };
+
+  // ===========================End of form implementation ==================
+
   // Create the value object that will be provided to components
   const contextValue = {
     // Filter states and setter functions
@@ -200,6 +243,9 @@ export const FilterProvider = ({ children }) => {
     allSessions,
     filteredSessions,
     isLoading,
+
+    //Game session
+    addGameSession,
 
     // Reset function
     resetFilters,
