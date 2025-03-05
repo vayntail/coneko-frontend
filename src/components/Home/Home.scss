@@ -1,0 +1,20 @@
+.home {
+  margin-left: 60px;
+  padding-left: 60px;
+  justify-items: center;
+
+  .select {
+    display: flex;
+    gap: 20px;
+  }
+
+  .slogan {
+    display: flex;
+    gap: 20px;
+  }
+
+  .categories {
+    display: flex;
+    gap: 20px;
+  }
+}
