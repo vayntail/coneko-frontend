@@ -50,13 +50,43 @@ export const FilterProvider = ({ children }) => {
       try {
         setIsLoading(true);
 
+        // First try to load any saved sessions from localStorage
+        // These are sessions that users have created in previous sessions
+        const savedSessions =
+          JSON.parse(localStorage.getItem("gameSessions")) || [];
+
+        // Make saved sessions have consistent structure
+        const normalizedSavedSessions = savedSessions.map((session) => ({
+          ...session,
+          // Ensure genres is always an array (because we can have one or multiple)
+          genres: Array.isArray(session.genres)
+            ? session.genres
+            : typeof session.genres === "string"
+            ? session.genres.split(",").map((g) => g.trim())
+            : [],
+          // Ensure customTags is always an array
+          customTags: Array.isArray(session.customTags)
+            ? session.customTags
+            : typeof session.customTags === "string"
+            ? session.customTags.split(",").map((t) => t.trim())
+            : [],
+        }));
+
         //import Mock game session data
+        //(Will replace with an API call)
         const module = await import("../assets/mockData/gameSessions");
-        const sessions = module.default;
+        const mockSessions = module.default;
 
-        setAllSessions(sessions);
-        setFilteredSessions(sessions); //Start with all sessions
+        // Combine both data sources
+        // Local storage sessions will appear alongside mock data
+        const combinedSessions = [...mockSessions, ...normalizedSavedSessions];
 
+        // Update our state with all sessions
+        setAllSessions(combinedSessions);
+        // Initially, filtered sessions are the same as all sessions
+        setFilteredSessions(combinedSessions);
+
+        //Data loading is complete, all sessions should show
         setIsLoading(false);
       } catch (error) {
         console.error(`Failed to load mock data`, error);

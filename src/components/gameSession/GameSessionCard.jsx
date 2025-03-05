@@ -14,17 +14,27 @@ const GameSessionCard = (props) => {
           <div>{props.game.platform}</div>
           <div> {props.game.region}</div>
 
-          {props.game.genres.map((genre) => (
-            <div>{genre}</div>
-          ))}
+          {/* Handle genres whether they're an array or a comma-separated string */}
+          {Array.isArray(props.game.genres)
+            ? props.game.genres.map((genre) => <div key={genre}>{genre}</div>)
+            : props.game.genres
+                ?.split(",")
+                .map((genre) => <div key={genre.trim()}>{genre.trim()}</div>)}
         </div>
-        {props.game.img ? (
-          /* check if game img exists */ <img
+
+        {/* Use imageUrl if available, otherwise use placeholder */}
+        {props.game.imageUrl ? (
+          <img
             className="game-img"
-            src={props.game.img}
+            src={props.game.imageUrl}
+            alt={props.game.title}
           />
         ) : (
-          <img className="game-img" src={placeholderImg} />
+          <img
+            className="game-img"
+            src={placeholderImg}
+            alt="Game placeholder"
+          />
         )}
 
         <div className="mid-box">
