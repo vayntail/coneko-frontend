@@ -1,3 +1,7 @@
+import { Route, Routes } from "react-router-dom";
+import Home from "./components/Home/Home";
+import Navbar from "./components/layout/Navbar";
+import "./index.scss";
 import Home from "./pages/Home/Home";
 import GameSessionList from "./components/gameSession/GameSessionList";
 // import TestFilterBar from "./components/test/TestFilterBar";
@@ -15,6 +19,10 @@ import FilterBar from "./components/filters/FilterBar";
 function App() {
   return (
     <>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+      <Navbar />
       <Home />
       {/* <TestFilterBar /> */}
       {/* <CompleteFilterSystemTest /> */}
