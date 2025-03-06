@@ -1,7 +1,8 @@
 import { Route, Routes } from "react-router-dom";
-import Navbar from "./components/layout/Navbar";
+import Layout from "./components/layout/Layout";
 import "./index.scss";
 import Home from "./pages/Home/Home";
+import Profile from "./pages/Profile/Profile";
 import GameSessionList from "./components/gameSession/GameSessionList";
 // import TestFilterBar from "./components/test/TestFilterBar";
 import CompleteFilterSystemTest from "./components/test/CompleteFilterSystemTest";
@@ -19,18 +20,32 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route
+          path="/"
+          element={
+            <Layout>
+              <Home />
+            </Layout>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <Layout>
+              <Profile />
+            </Layout>
+          }
+        />
       </Routes>
 
-      <Navbar />
       {/* <Home /> */}
       {/* <TestFilterBar /> */}
       {/* <CompleteFilterSystemTest /> */}
 
-      <FilterProvider>
+      {/* <FilterProvider>
         <FilterBar />
         <GameSessionList />
-      </FilterProvider>
+      </FilterProvider> */}
     </>
   );
 }

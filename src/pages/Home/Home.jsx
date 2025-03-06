@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import GameSessionForm from "./HomeForm";
+import GameSessionList from "../../components/gameSession/GameSessionList";
+import { FilterProvider } from "../../context/FilterContext";
+import FilterBar from "../../components/filters/FilterBar";
 
 export default () => {
   const [gameSessions, setGameSessions] = useState([]);
@@ -12,6 +15,10 @@ export default () => {
   return (
     <div className="Home">
       <GameSessionForm />
+      <FilterProvider>
+        <FilterBar />
+        <GameSessionList />
+      </FilterProvider>
 
       <div className="TestList">
         <h2>Saved Sessions</h2> <br />

@@ -1,5 +1,6 @@
 import GameSessionCard from "./GameSessionCard";
 import { useFilters } from "../../context/FilterContext";
+import "./GameCard.scss";
 
 const GameSessionList = () => {
   const { filteredSessions, isLoading } = useFilters();
