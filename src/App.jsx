@@ -22,7 +22,7 @@ function App() {
         <Route path="/" element={<Home />} />
       </Routes>
 
-      <Navbar />
+      {/* <Navbar /> */}
       {/* <Home /> */}
       {/* <TestFilterBar /> */}
       {/* <CompleteFilterSystemTest /> */}
