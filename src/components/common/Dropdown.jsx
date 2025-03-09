@@ -56,6 +56,12 @@ const Dropdown = ({
     }
   };
 
+  //A Function so the checkboxes clicks directly
+  const handleCheckboxChange = (option, evt) => {
+    evt.stopPropagation(); //prevent bubbaling down the line
+    handleSelect(option);
+  };
+
   //DropDown Label Display
 
   const getDisplayLabel = () => {
@@ -103,7 +109,8 @@ const Dropdown = ({
                   type="checkbox"
                   // Checked if all options are selected
                   checked={selected.length === options.length}
-                  onChange={() => {
+                  onChange={(evt) => {
+                    evt.stopPropagation();
                     // If all are selected, clear selection
                     if (selected.length === options.length) {
                       onSelect([]);
@@ -112,8 +119,9 @@ const Dropdown = ({
                       onSelect(options.map((opt) => opt.value));
                     }
                   }}
+                  onClick={(evt) => evt.stopPropagation()} //Hopefully prevents doubleclick bugging (Todo change)
                 />
-                Select All
+                {" Select All"}
               </label>
             </li>
           )}
@@ -138,10 +146,11 @@ const Dropdown = ({
                   <input
                     type="checkbox"
                     checked={selected.includes(option.value)}
-                    onChange={() => {}} // Handled by onClick on li [can replace ( handleSelect(option) with {} { for checkbox})]
+                    onChange={(e) => handleCheckboxChange(option, e)} // Handled by onClick on li [can replace ( handleSelect(option) with {} { for checkbox})]
                     onClick={(e) => e.stopPropagation()} // Prevent double-triggering
                   />
-                  {option.label}
+
+                  {" " + option.label}
                 </label>
               ) : (
                 // For single-select, just show the label
