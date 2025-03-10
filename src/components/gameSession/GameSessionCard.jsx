@@ -1,6 +1,7 @@
 import "./GameCard.scss";
 import placeholderImg from "../../assets/placeholders/placeholder-img.png";
 import UserCircle from "./UserCircle";
+import leaderIcon from "../../assets/placeholders/leader.webp"; // Crown Icon Lenny
 
 const GameSessionCard = (props) => {
   const onJoinButtonClick = () => {
@@ -31,7 +32,18 @@ const GameSessionCard = (props) => {
           <h2>{props.game.title}</h2>
           <p>{props.game.description}</p>
           <div className="user-circles">
-            <UserCircle user={""} />
+            {props.game.currentPlayers.map((player, index) =>
+              player.isLeader ? (
+                <img
+                  key={index}
+                  src={leaderIcon}
+                  alt="Leader Crown"
+                  className="user-icon"
+                />
+              ) : (
+                <UserCircle key={index} user={player} />
+              )
+            )}
           </div>
         </div>
       </div>
