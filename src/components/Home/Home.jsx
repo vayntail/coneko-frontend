@@ -1,56 +1,46 @@
-import { useState, useEffect } from "react";
-import "./Home.scss";
+import { useEffect, useState } from "react";
+import GameSessionForm from "./HomeForm";
 
-function Home() {
+export default () => {
+  const [gameSessions, setGameSessions] = useState([]);
+
+  useEffect(() => {
+    const savedSessions =
+      JSON.parse(localStorage.getItem("gameSessions")) || [];
+    setGameSessions(savedSessions);
+  }, []);
   return (
-    <div className="home">
-      <div className="select">
-        <h2>Groups</h2>
-        <h2>Players</h2>
-      </div>
-      <br />
-      <br />
-      <div className="featured">
-        <form className="slogan">
-          <h3>Daily Changing Slogan</h3>
-          <input type="text" placeholder="Create a Group" />
-          <input type="search" placeholder="Group Finder" />
-        </form>
-      </div>
-      <br />
-      <br />
-      <div>
-        <form className="categories">
-          <select>
-            <option>All Platforms</option>
-            <option>PC</option>
-            <option>PlayStation</option>
-            <option>Xbox</option>
-          </select>
-          <select>
-            <option>Genres</option>
-            <option>RPG</option>
-            <option>MMO</option>
-            <option>FPS</option>
-            <option>Survival</option>
-          </select>
-          <select>
-            <option>All Regions</option>
-            <option>NA</option>
-            <option>EU</option>
-            <option>AS</option>
-          </select>
-          <select>
-            <option>Any Group Size</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
-          </select>
-          <input type="search" placeholder="search" />
-        </form>
+    <div className="Home">
+      <GameSessionForm />
+
+      <div className="TestList">
+        <h2>Saved Sessions</h2> <br />
+        {gameSessions.length === 0 ? (
+          <p>No sessions</p>
+        ) : (
+          <ul>
+            {gameSessions.map((session) => (
+              <li key={session.id}>
+                <h3>{session.title}</h3>
+                <p>{session.description}</p>
+                <p>
+                  <strong>Platform:</strong> {session.platform}
+                </p>
+                <p>
+                  <strong>Players:</strong> {session.currentPlayers}/
+                  {session.maxPlayers}
+                </p>
+                <p>
+                  <strong>Status:</strong> {session.status}
+                </p>
+                <p>
+                  <strong>Tags:</strong> {session.customTags.join(", ")}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
-}
-
-export default Home;
+};
