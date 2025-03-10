@@ -11,6 +11,7 @@ const Dropdown = ({
   className = "",
   allowMultiple = false,
   showSelectedCount = false,
+  showSelectAll = true, // New prop to control visibility of Select All option
 }) => {
   //State to track wheter dropdown is open or closed
   const [isOpen, setIsOpen] = useState(false);
@@ -67,6 +68,13 @@ const Dropdown = ({
   const getDisplayLabel = () => {
     // If multiSelect and we have selections
     if (allowMultiple && selected.length > 0) {
+      // If using array format for single selection (like in GroupSizeFilter)
+      if (selected.length === 1) {
+        const selectedOption = options.find((opt) => opt.value === selected[0]);
+        return selectedOption ? selectedOption.label : label;
+      }
+
+      // Otherwise show count for true multi-select
       return showSelectedCount
         ? `${label} (${selected.length})` // Show label with count
         : `${label}`; // Just show the label
@@ -101,8 +109,8 @@ const Dropdown = ({
       {/* Dropdown menu - only shown when isOpen is true */}
       {isOpen && (
         <ul className="dropdownList" role="listbox">
-          {/* For multi-select, show a "Select All" option */}
-          {allowMultiple && (
+          {/* For multi-select, show a "Select All" option - if showSelectAll is true */}
+          {allowMultiple && showSelectAll && (
             <li className="dropdownItem dropdownItemAll">
               <label>
                 <input
@@ -146,7 +154,7 @@ const Dropdown = ({
                   <input
                     type="checkbox"
                     checked={selected.includes(option.value)}
-                    onChange={(e) => handleCheckboxChange(option, e)} // Handled by onClick on li [can replace ( handleSelect(option) with {} { for checkbox})]
+                    onChange={(e) => handleCheckboxChange(option, e)}
                     onClick={(e) => e.stopPropagation()} // Prevent double-triggering
                   />
 
