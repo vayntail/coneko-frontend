@@ -31,7 +31,7 @@ const GameSessionCard = (props) => {
         <div className="mid-box">
           <h2>{props.game.title}</h2>
           <p>{props.game.description}</p>
-          <div className="user-circles">
+          <div className="user-circles horizontal-layout">
             {props.game.currentPlayers.map((player, index) =>
               player.isLeader ? (
                 <img

@@ -23,10 +23,19 @@ img {
   width: 100%;
 }
 
+.horizontal-layout {
+  /*lenny*/
+  display: flex; /* Aligns circles horizontally */
+  gap: 10px; /* Adds space between icons */
+  justify-content: flex-start; /* Aligns icons to the left */
+  align-items: center; /* Centers icons vertically in case heights vary */
+}
+
 .user-icon {
+  /*lenny*/
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 3px solid #ffd700; /* Gold Border for Crown (Lenny) */
+  border: 3px solid #ffd700; /* Gold Border for Crown */
   object-fit: cover;
 }
