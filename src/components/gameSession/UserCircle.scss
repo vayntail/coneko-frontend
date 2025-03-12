@@ -7,14 +7,19 @@
   border: 2px solid transparent;
   cursor: pointer;
 
-  &.selected {
-    background-color: #333;
-    border-color: #967ce4;
-  }
-
   img {
     width: 100%;
     height: 100%;
     border-radius: 50%;
   }
+}
+.user-circle {
+  width: 50px; /* Adjust size as desired */
+  height: 50px; /* Ensure uniform size */
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #ccc;
+  cursor: pointer; /* Adds click feedback */
 }

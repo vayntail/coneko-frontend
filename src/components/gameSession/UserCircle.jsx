@@ -2,7 +2,7 @@ import "./UserCircle.scss";
 import userImg from "../../assets/placeholders/user-img.png";
 import leaderImg from "../../assets/placeholders/leader.png"; // Crown icon import
 
-const UserCircle = ({ user, onClick }) => {
+const UserCircle = ({ user }) => {
   const circleStyle = {
     height: "50px",
     width: "50px",
@@ -12,7 +12,7 @@ const UserCircle = ({ user, onClick }) => {
   };
 
   return (
-    <div className="user-circle" onClick={onClick} style={circleStyle}>
+    <div className="user-circle" style={circleStyle}>
       <img
         src={user.isLeader ? leaderImg : userImg}
         alt={user.isLeader ? "Leader" : "User"}

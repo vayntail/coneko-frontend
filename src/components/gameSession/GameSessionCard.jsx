@@ -19,6 +19,7 @@ const GameSessionCard = (props) => {
             <div key={genre}>{genre}</div>
           ))}
         </div>
+
         {props.game.img ? (
           <img className="game-img" src={props.game.img} />
         ) : (
@@ -28,16 +29,14 @@ const GameSessionCard = (props) => {
         <div className="mid-box">
           <h2>{props.game.title}</h2>
           <p>{props.game.description}</p>
+
           <div className="user-circles">
             {/* Crown Icon for the Leader */}
-            {props.game.currentPlayers.map((player, index) => (
-              <UserCircle
-                key={index}
-                user={{
-                  ...player,
-                  isLeader: index === 0, // First user will always have the crown   ////Lenny///
-                }}
-              />
+            <UserCircle user={{ isLeader: true }} />
+
+            {/* Exactly 5 Grey User Icons for Slots */}
+            {[...Array(5)].map((_, index) => (
+              <UserCircle key={index} user={{ isSelected: false }} />
             ))}
           </div>
         </div>
