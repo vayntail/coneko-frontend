@@ -62,7 +62,7 @@
     position: absolute;
     top: 100%;
     left: 0;
-    z-index: 10; // ensure dropdown appears above other content
+    z-index: 10;
     background-color: white;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -76,23 +76,33 @@
   }
 
   .dropdownItem {
-    padding: 8px 12px;
+    padding: 0; /* Remove padding from li itself */
     cursor: pointer;
     font-size: 14px;
 
+    /* Apply the background highlight to the entire item */
     &:hover {
       background-color: #f0f0f0;
     }
 
-    label {
+    &[aria-selected="true"] {
+      background-color: #f5f5f5;
+    }
+
+    /* Make the label or content take the full space of the item */
+    label,
+    .option-label {
       display: flex;
       align-items: center;
-      cursor: pointer;
       width: 100%;
+      padding: 8px 12px; /* Move padding from li to label/span */
+      cursor: pointer;
+      margin: 0;
     }
 
     input[type="checkbox"] {
       margin-right: 8px;
+      cursor: pointer;
     }
   }
 
