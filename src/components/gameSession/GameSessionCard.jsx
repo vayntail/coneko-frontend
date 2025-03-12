@@ -7,29 +7,59 @@ const GameSessionCard = (props) => {
     console.log("JOINED!");
   };
 
+  // Safely get the game object, ensure it exists
+  const game = props.game || {};
+
   return (
     <div className="card flex-horizontal">
       <div className="flex-horizontal">
         <div className="filter-icons">
-          <div>{props.game.platform}</div>
-          <div> {props.game.region}</div>
+          {/* Display platform(s) */}
+          {Array.isArray(game.platforms) && game.platforms.length > 0 ? (
+            // If platforms array exists, map through it
+            game.platforms.map((platform, index) => (
+              <div key={`platform-${index}`}>{platform}</div>
+            ))
+          ) : (
+            // Fallback to single platform or unknown
+            <div>{game.platform || "Unknown"}</div>
+          )}
 
-          {props.game.genres.map((genre) => (
-            <div>{genre}</div>
-          ))}
+          {/* Display region(s) */}
+          {Array.isArray(game.regions) && game.regions.length > 0 ? (
+            // If regions array exists, map through it
+            game.regions.map((region, index) => (
+              <div key={`region-${index}`}>{region}</div>
+            ))
+          ) : (
+            // Fallback to single region or unknown
+            <div>{game.region || "Unknown"}</div>
+          )}
+
+          {/* Display genre(s) */}
+          {Array.isArray(game.genres) && game.genres.length > 0 ? (
+            game.genres.map((genre, index) => (
+              <div key={`genre-${index}`}>{genre}</div>
+            ))
+          ) : (
+            <div>No genres</div>
+          )}
         </div>
-        {props.game.img ? (
-          /* check if game img exists */ <img
-            className="game-img"
-            src={props.game.img}
-          />
+
+        {/* Check if game img exists */}
+        {game.img ? (
+          <img className="game-img" src={game.img} alt={game.title} />
         ) : (
-          <img className="game-img" src={placeholderImg} />
+          <img
+            className="game-img"
+            src={placeholderImg}
+            alt="Game placeholder"
+          />
         )}
 
         <div className="mid-box">
-          <h2>{props.game.title}</h2>
-          <p>{props.game.description}</p>
+          <h2>{game.title || "Untitled Game"}</h2>
+          <p>{game.description || "No description available"}</p>
           <div className="user-circles">
             <UserCircle user={""} />
           </div>
@@ -37,9 +67,9 @@ const GameSessionCard = (props) => {
       </div>
 
       <div className="join-box">
-        <p>{props.game.scheduledTime}</p>
+        <p>{game.scheduledTime || "No time specified"}</p>
         <p>
-          {props.game.currentPlayers}/{props.game.maxPlayers}
+          {game.currentPlayers || 0}/{game.maxPlayers || 0}
         </p>
         <button onClick={onJoinButtonClick}>Join</button>
       </div>

@@ -1,4 +1,5 @@
 import { useFilters } from "../../context/FilterContext";
+import "./FilterBar.scss";
 
 // Individual filter components
 import PlatformFilter from "./PlatformFilter";

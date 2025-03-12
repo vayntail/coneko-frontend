@@ -8,6 +8,20 @@ import NewRequestButton from "../../components/form/NewRequestButton";
 import "./Home.scss";
 
 function Home() {
+  // State to force refresh of the filter provider
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Handler for when a new session is created
+  const handleSessionCreated = (newSession) => {
+    console.log("New session created:", newSession);
+
+    // Force the FilterProvider to reload by changing its key prop
+    setRefreshKey((prevKey) => prevKey + 1);
+
+    // Optional: show a success message
+    alert("Game session created successfully!");
+  };
+
   return (
     <div className="home">
       <div className="select">
@@ -26,9 +40,13 @@ function Home() {
       <br />
       <br />
 
-      <NewRequestButton />
       {/* main games requests list */}
-      <FilterProvider>
+      <FilterProvider key={`filter-provider-${refreshKey}`}>
+        {/* Add the NewRequestButton at the top right */}
+        <div className="headerActions">
+          <NewRequestButton onSessionCreated={handleSessionCreated} />
+        </div>
+
         <FilterBar />
         <GameSessionList />
       </FilterProvider>
