@@ -120,14 +120,16 @@ export const FilterProvider = ({ children }) => {
       results = results.filter(
         (session) =>
           // Check if any of the selected genres are in the session's genres array
-          session.genres &&
-          genres.some((genre) => session.genres.includes(genre))
+          session.gameGenre &&
+          genres.some((genre) => session.gameGenre.includes(genre))
       );
     }
 
     // Filter by regions - if any regions are selected
     if (regions.length > 0) {
-      results = results.filter((session) => regions.includes(session.region));
+      results = results.filter(
+        (session) => regions.includes(session.gameRegion[0]) // set to first region from list
+      );
     }
 
     // Filter by custom tags - if any custom tags are selected
@@ -168,9 +170,10 @@ export const FilterProvider = ({ children }) => {
       results = results.filter(
         (session) =>
           // Search in title and description
-          (session.title && session.title.toLowerCase().includes(term)) ||
-          (session.description &&
-            session.description.toLowerCase().includes(term))
+          (session.gameTitle &&
+            session.gameTitle.toLowerCase().includes(term)) ||
+          (session.requestDescription &&
+            session.requestDescription.toLowerCase().includes(term))
       );
     }
 

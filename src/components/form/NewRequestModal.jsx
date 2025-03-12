@@ -131,18 +131,18 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
     try {
       const newGameSession = {
         id: Date.now().toString(), // Temporary ID (will be assigned by the backend)
-        title: formData.gameTitle,
-        description: formData.description,
+        gameTitle: formData.gameTitle,
+        requestDescription: formData.description,
         // Use the primary platform as the main platform (for filtering purposes)
         platform: formData.platforms.length > 0 ? formData.platforms[0] : "",
         // Store all platforms for display
         platforms: formData.platforms,
         // Store all genres
-        genres: formData.genres,
+        gameGenre: formData.genres,
         // Use the primary region as the main region (for filtering purposes)
-        region: formData.regions.length > 0 ? formData.regions[0] : "",
+        // region: formData.regions.length > 0 ? formData.regions[0] : "", REMOVED THIS SINCE I INDEX [0] IN FILTER CONTEXT INSTEAD!
         // Store all regions
-        regions: formData.regions,
+        gameRegion: formData.regions,
         maxPlayers: formData.playersNeeded,
         currentPlayers: 1, // Creator is the first player
         inviteCode: formData.inviteCode,
