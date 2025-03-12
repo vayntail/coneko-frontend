@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import "./NewRequestModal.scss";
 
-// Mock Data (to be replacede with backend API Calls)
+// Mock Data (to be replaced with backend API Calls)
 import {
   platformOptions,
   genreOptions,
   regionOptions,
   customTagOptions,
 } from "../../assets/mockData/filterOptions";
+
+// Import a placeholder image for new sessions
+import placeholderImg from "../../assets/placeholders/placeholder-img.png";
 
 //What is this?
 /* *This component handles:
@@ -21,13 +24,13 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
   //If the model is not open, don't render anything
   if (!isOpen) return null;
 
-  // Initialize form state with default values
+  // Initialize form state with default values - now using arrays for multiple selections
   const [formData, setFormData] = useState({
     gameTitle: "",
     description: "",
-    platform: "",
-    gameGenre: "",
-    gameRegion: "",
+    platforms: [], // Changed from platform (string) to platforms (array)
+    genres: [], // Changed from gameGenre (string) to genres (array)
+    regions: [], // Changed from gameRegion (string) to regions (array)
     playersNeeded: 1,
     inviteCode: "",
     customTags: [],
@@ -40,6 +43,9 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
 
   //State for tracking form submission
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // We're removing the scroll lock functionality completely
+  // No useEffect hook for body scrolling
 
   //Handles input changes for text, number and, select fields
   const handleInputChange = (evt) => {
@@ -63,7 +69,6 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
   };
 
   //Handle changes to custom tag selections
-
   const handleTagToggle = (tag) => {
     const newTags = formData.customTags.includes(tag)
       ? formData.customTags.filter((t) => t !== tag)
@@ -76,7 +81,6 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
   };
 
   // Handle changes to the join type radio buttons
-
   const handleJoinTypeChange = (joinType) => {
     setFormData({
       ...formData,
@@ -85,16 +89,18 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
   };
 
   //Validates the form data
-
   const validateForm = () => {
     const newErrors = {};
 
     // Required fields
     if (!formData.gameTitle.trim())
       newErrors.gameTitle = "Game name is required";
-    if (!formData.platform) newErrors.platform = "Platform is required";
-    if (!formData.gameGenre) newErrors.gameGenre = "Genre is required";
-    if (!formData.gameRegion) newErrors.gameRegion = "Region is required";
+    if (formData.platforms.length === 0)
+      newErrors.platforms = "At least one platform is required";
+    if (formData.genres.length === 0)
+      newErrors.genres = "At least one genre is required";
+    if (formData.regions.length === 0)
+      newErrors.regions = "At least one region is required";
     if (!formData.inviteCode.trim())
       newErrors.inviteCode = "Invite code is required";
 
@@ -107,17 +113,19 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
   };
 
   //Handles form submission
-
-  const handleSubmit = async (evt) => {
+  const handleSubmit = (evt) => {
     evt.preventDefault();
 
-    //Validate the form
+    // Validate the form
     const formErrors = validateForm();
+
+    // If there are errors, update the errors state and stop submission
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
       return;
     }
 
+    // No errors, proceed with submission
     setIsSubmitting(true);
 
     try {
@@ -125,23 +133,39 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
         id: Date.now().toString(), // Temporary ID (will be assigned by the backend)
         title: formData.gameTitle,
         description: formData.description,
-        platform: formData.platform,
-        genres: [formData.gameGenre], // Backend expects an array
-        region: formData.gameRegion,
+        // Use the primary platform as the main platform (for filtering purposes)
+        platform: formData.platforms.length > 0 ? formData.platforms[0] : "",
+        // Store all platforms for display
+        platforms: formData.platforms,
+        // Store all genres
+        genres: formData.genres,
+        // Use the primary region as the main region (for filtering purposes)
+        region: formData.regions.length > 0 ? formData.regions[0] : "",
+        // Store all regions
+        regions: formData.regions,
         maxPlayers: formData.playersNeeded,
         currentPlayers: 1, // Creator is the first player
         inviteCode: formData.inviteCode,
-        customTags: formData.customTags,
+        customTags: formData.customTags || [], // Ensure customTags is always an array
         status: formData.status,
         joinType: formData.joinType,
         createdAt: new Date().toISOString(),
         scheduledTime: new Date().toISOString(), // Default to now
+        img: placeholderImg, // Add a placeholder image for new sessions
       };
 
+      // Get existing sessions
+      let existingSessions = [];
+      try {
+        existingSessions =
+          JSON.parse(localStorage.getItem("gameSessions")) || [];
+      } catch (error) {
+        console.error("Error parsing existing sessions:", error);
+        existingSessions = [];
+      }
+
       // =============Temporary: Save to localStorage ===
-      // (This will be replaced with an API call to POST  /api/request-ticket)
-      const existingSessions =
-        JSON.parse(localStorage.getItem("gameSessions")) || [];
+      // (This will be replaced with an API call to POST /api/request-ticket)
       localStorage.setItem(
         "gameSessions",
         JSON.stringify([...existingSessions, newGameSession])
@@ -158,9 +182,9 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
         setFormData({
           gameTitle: "",
           description: "",
-          platform: "",
-          gameGenre: "",
-          gameRegion: "",
+          platforms: [], // Reset platforms array
+          genres: [], // Reset genres array
+          regions: [], // Reset regions array
           playersNeeded: 1,
           inviteCode: "",
           customTags: [],
@@ -180,21 +204,21 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="modalOverlay">
+      <div className="modalContent">
+        <div className="modalHeader">
           <h2>Group Creation</h2>
-          <button className="close-button" onClick={onClose} aria-label="Close">
+          <button className="closeButton" onClick={onClose} aria-label="Close">
             ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="create-session-form">
-          <div className="form-grid">
+        <form onSubmit={handleSubmit} className="createSessionForm">
+          <div className="formGrid">
             {/* Left column */}
-            <div className="form-column">
+            <div className="formColumn">
               {/* Game Name */}
-              <div className="form-group">
+              <div className="formGroup">
                 <input
                   type="text"
                   id="gameTitle"
@@ -205,75 +229,210 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                   className={errors.gameTitle ? "error" : ""}
                 />
                 {errors.gameTitle && (
-                  <div className="error-message">{errors.gameTitle}</div>
+                  <div className="errorMessage">{errors.gameTitle}</div>
                 )}
               </div>
 
-              {/* Game Genre Dropdown */}
-              <div className="form-group">
+              {/* Game Genres - Multiple Selection */}
+              <div className="formGroup">
                 <select
-                  id="gameGenre"
-                  name="gameGenre"
-                  value={formData.gameGenre}
-                  onChange={handleInputChange}
-                  className={errors.gameGenre ? "error" : ""}
+                  id="genres"
+                  name="genres"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      // Only add the genre if it's not already selected
+                      if (!formData.genres.includes(e.target.value)) {
+                        setFormData({
+                          ...formData,
+                          genres: [...formData.genres, e.target.value],
+                        });
+                      }
+                      // Reset the select to default option after selection
+                      e.target.value = "";
+                    }
+                  }}
+                  className={errors.genres ? "error" : ""}
                 >
-                  <option value="">Game Genre</option>
-                  {genreOptions.map((genre) => (
-                    <option key={genre.value} value={genre.value}>
-                      {genre.label}
-                    </option>
-                  ))}
+                  <option value="">Select Game Genres</option>
+                  {genreOptions
+                    .filter((genre) => !formData.genres.includes(genre.value))
+                    .map((genre) => (
+                      <option key={genre.value} value={genre.value}>
+                        {genre.label}
+                      </option>
+                    ))}
                 </select>
-                {errors.gameGenre && (
-                  <div className="error-message">{errors.gameGenre}</div>
+
+                {/* Display selected genres */}
+                {formData.genres.length > 0 && (
+                  <div className="selectedTags">
+                    {formData.genres.map((genreValue) => {
+                      const genre = genreOptions.find(
+                        (g) => g.value === genreValue
+                      );
+                      return (
+                        <div key={genreValue} className="selectedTag">
+                          <span>{genre ? genre.label : genreValue}</span>
+                          <button
+                            type="button"
+                            className="removeTagBtn"
+                            onClick={() => {
+                              setFormData({
+                                ...formData,
+                                genres: formData.genres.filter(
+                                  (g) => g !== genreValue
+                                ),
+                              });
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {errors.genres && (
+                  <div className="errorMessage">{errors.genres}</div>
                 )}
               </div>
 
-              {/* Game Platform Dropdown */}
-              <div className="form-group">
+              {/* Game Platforms - Multiple Selection */}
+              <div className="formGroup">
                 <select
-                  id="platform"
-                  name="platform"
-                  value={formData.platform}
-                  onChange={handleInputChange}
-                  className={errors.platform ? "error" : ""}
+                  id="platforms"
+                  name="platforms"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      // Only add the platform if it's not already selected
+                      if (!formData.platforms.includes(e.target.value)) {
+                        setFormData({
+                          ...formData,
+                          platforms: [...formData.platforms, e.target.value],
+                        });
+                      }
+                      // Reset the select to default option after selection
+                      e.target.value = "";
+                    }
+                  }}
+                  className={errors.platforms ? "error" : ""}
                 >
-                  <option value="">Game Platform</option>
-                  {platformOptions.map((platform) => (
-                    <option key={platform.value} value={platform.value}>
-                      {platform.label}
-                    </option>
-                  ))}
+                  <option value="">Select Game Platforms</option>
+                  {platformOptions
+                    .filter(
+                      (platform) => !formData.platforms.includes(platform.value)
+                    )
+                    .map((platform) => (
+                      <option key={platform.value} value={platform.value}>
+                        {platform.label}
+                      </option>
+                    ))}
                 </select>
-                {errors.platform && (
-                  <div className="error-message">{errors.platform}</div>
+
+                {/* Display selected platforms */}
+                {formData.platforms.length > 0 && (
+                  <div className="selectedTags">
+                    {formData.platforms.map((platformValue) => {
+                      const platform = platformOptions.find(
+                        (p) => p.value === platformValue
+                      );
+                      return (
+                        <div key={platformValue} className="selectedTag">
+                          <span>
+                            {platform ? platform.label : platformValue}
+                          </span>
+                          <button
+                            type="button"
+                            className="removeTagBtn"
+                            onClick={() => {
+                              setFormData({
+                                ...formData,
+                                platforms: formData.platforms.filter(
+                                  (p) => p !== platformValue
+                                ),
+                              });
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {errors.platforms && (
+                  <div className="errorMessage">{errors.platforms}</div>
                 )}
               </div>
 
-              {/* Game Region Dropdown */}
-              <div className="form-group">
+              {/* Game Regions - Multiple Selection */}
+              <div className="formGroup">
                 <select
-                  id="gameRegion"
-                  name="gameRegion"
-                  value={formData.gameRegion}
-                  onChange={handleInputChange}
-                  className={errors.gameRegion ? "error" : ""}
+                  id="regions"
+                  name="regions"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      // Only add the region if it's not already selected
+                      if (!formData.regions.includes(e.target.value)) {
+                        setFormData({
+                          ...formData,
+                          regions: [...formData.regions, e.target.value],
+                        });
+                      }
+                      // Reset the select to default option after selection
+                      e.target.value = "";
+                    }
+                  }}
+                  className={errors.regions ? "error" : ""}
                 >
-                  <option value="">Game Region</option>
-                  {regionOptions.map((region) => (
-                    <option key={region.value} value={region.value}>
-                      {region.label}
-                    </option>
-                  ))}
+                  <option value="">Select Game Regions</option>
+                  {regionOptions
+                    .filter(
+                      (region) => !formData.regions.includes(region.value)
+                    )
+                    .map((region) => (
+                      <option key={region.value} value={region.value}>
+                        {region.label}
+                      </option>
+                    ))}
                 </select>
-                {errors.gameRegion && (
-                  <div className="error-message">{errors.gameRegion}</div>
+
+                {/* Display selected regions */}
+                {formData.regions.length > 0 && (
+                  <div className="selectedTags">
+                    {formData.regions.map((regionValue) => {
+                      const region = regionOptions.find(
+                        (r) => r.value === regionValue
+                      );
+                      return (
+                        <div key={regionValue} className="selectedTag">
+                          <span>{region ? region.label : regionValue}</span>
+                          <button
+                            type="button"
+                            className="removeTagBtn"
+                            onClick={() => {
+                              setFormData({
+                                ...formData,
+                                regions: formData.regions.filter(
+                                  (r) => r !== regionValue
+                                ),
+                              });
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {errors.regions && (
+                  <div className="errorMessage">{errors.regions}</div>
                 )}
               </div>
 
               {/* Game Invite Code */}
-              <div className="form-group">
+              <div className="formGroup">
                 <input
                   type="text"
                   id="inviteCode"
@@ -284,40 +443,65 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                   className={errors.inviteCode ? "error" : ""}
                 />
                 {errors.inviteCode && (
-                  <div className="error-message">{errors.inviteCode}</div>
+                  <div className="errorMessage">{errors.inviteCode}</div>
                 )}
               </div>
 
               {/* Custom Filters */}
-              <div className="form-group custom-filters">
-                <div className="custom-filters-header">
-                  <span>Custom Filters</span>
-                  <button type="button" className="add-filter-btn">
-                    +
-                  </button>
-                </div>
-                <div className="tags-container">
-                  {customTagOptions.map((tag) => (
-                    <div
-                      key={tag.value}
-                      className={`tag ${
-                        formData.customTags.includes(tag.value)
-                          ? "selected"
-                          : ""
-                      }`}
-                      onClick={() => handleTagToggle(tag.value)}
-                    >
-                      {tag.label}
-                    </div>
-                  ))}
-                </div>
+              <div className="formGroup">
+                <select
+                  id="customFilter"
+                  name="customFilter"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      // Only add the tag if it's not already selected
+                      if (!formData.customTags.includes(e.target.value)) {
+                        handleTagToggle(e.target.value);
+                      }
+                      // Reset the select to default option after selection
+                      e.target.value = "";
+                    }
+                  }}
+                >
+                  <option value="">Select Custom Filters</option>
+                  {customTagOptions
+                    .filter((tag) => !formData.customTags.includes(tag.value))
+                    .map((tag) => (
+                      <option key={tag.value} value={tag.value}>
+                        {tag.label}
+                      </option>
+                    ))}
+                </select>
+
+                {/* Display selected tags */}
+                {formData.customTags.length > 0 && (
+                  <div className="selectedTags">
+                    {formData.customTags.map((tagValue) => {
+                      const tag = customTagOptions.find(
+                        (t) => t.value === tagValue
+                      );
+                      return (
+                        <div key={tagValue} className="selectedTag">
+                          <span>{tag ? tag.label : tagValue}</span>
+                          <button
+                            type="button"
+                            className="removeTagBtn"
+                            onClick={() => handleTagToggle(tagValue)}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Right column */}
-            <div className="form-column">
+            <div className="formColumn">
               {/* Group Description */}
-              <div className="form-group">
+              <div className="formGroup">
                 <textarea
                   id="description"
                   name="description"
@@ -328,12 +512,12 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                   className={errors.description ? "error" : ""}
                 ></textarea>
                 {errors.description && (
-                  <div className="error-message">{errors.description}</div>
+                  <div className="errorMessage">{errors.description}</div>
                 )}
               </div>
 
               {/* Number of Players Needed */}
-              <div className="form-group">
+              <div className="formGroup">
                 <input
                   type="number"
                   id="playersNeeded"
@@ -346,13 +530,13 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                   className={errors.playersNeeded ? "error" : ""}
                 />
                 {errors.playersNeeded && (
-                  <div className="error-message">{errors.playersNeeded}</div>
+                  <div className="errorMessage">{errors.playersNeeded}</div>
                 )}
               </div>
 
               {/* Join Options */}
-              <div className="form-group join-options">
-                <div className="checkbox-group">
+              <div className="formGroup joinOptions">
+                <div className="checkboxGroup">
                   <input
                     type="checkbox"
                     id="joinOpen"
@@ -362,7 +546,7 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                   <label htmlFor="joinOpen">Anyone Can join</label>
                 </div>
 
-                <div className="checkbox-group">
+                <div className="checkboxGroup">
                   <input
                     type="checkbox"
                     id="joinRequest"
@@ -377,14 +561,14 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
 
           {/* Form submission error (if any) */}
           {errors.submit && (
-            <div className="error-message submit-error">{errors.submit}</div>
+            <div className="errorMessage submitError">{errors.submit}</div>
           )}
 
           {/* Submit Button */}
-          <div className="form-actions">
+          <div className="formActions">
             <button
               type="submit"
-              className="submit-button"
+              className="submitButton"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Creating..." : "Create Group"}

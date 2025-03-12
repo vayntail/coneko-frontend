@@ -12,7 +12,7 @@ function App() {
         {/* main home page */}
         <Route path="/" element={<Home />} />
         {/* profile page */}
-        <Route path="/" element={<Profile />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </>
   );

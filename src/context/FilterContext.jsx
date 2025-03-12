@@ -43,29 +43,44 @@ export const FilterProvider = ({ children }) => {
   //State for loading status
   const [isLoading, setIsLoading] = useState(true);
 
-  //Load Mock game session data
+  //Load game session data
   useEffect(() => {
     // (Todo replace with backend API)
-    const loadMockData = async () => {
+    const loadData = async () => {
       try {
         setIsLoading(true);
 
-        //import Mock game session data
-        const module = await import("../assets/mockData/gameSessions");
-        const sessions = module.default;
+        // First try to load from localStorage
+        let sessions = [];
+        try {
+          const localSessions = localStorage.getItem("gameSessions");
+          if (localSessions) {
+            sessions = JSON.parse(localSessions);
+            console.log("Loaded sessions from localStorage:", sessions.length);
+          }
+        } catch (error) {
+          console.error("Error loading from localStorage:", error);
+        }
+
+        // If no localStorage data or empty array, fall back to mock data
+        if (sessions.length === 0) {
+          console.log("No localStorage data, loading mock data");
+          const module = await import("../assets/mockData/gameSessions");
+          sessions = module.default;
+        }
 
         setAllSessions(sessions);
         setFilteredSessions(sessions); //Start with all sessions
 
         setIsLoading(false);
       } catch (error) {
-        console.error(`Failed to load mock data`, error);
+        console.error(`Failed to load session data`, error);
         setIsLoading(false);
       }
     };
 
-    loadMockData();
-  }, []);
+    loadData();
+  }, []); // Empty dependency array ensures this runs once on mount
 
   //Apply filters whenever any filter changes
   useEffect(() => {
