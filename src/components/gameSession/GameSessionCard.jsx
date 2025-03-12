@@ -1,6 +1,7 @@
 import "./GameCard.scss";
 import placeholderImg from "../../assets/placeholders/placeholder-img.png";
 import UserCircle from "./UserCircle";
+import leaderImg from "../../assets/placeholders/leader.png"; // Add Crown Icon Here
 
 const GameSessionCard = (props) => {
   const onJoinButtonClick = () => {
@@ -15,14 +16,11 @@ const GameSessionCard = (props) => {
           <div> {props.game.region}</div>
 
           {props.game.genres.map((genre) => (
-            <div>{genre}</div>
+            <div key={genre}>{genre}</div>
           ))}
         </div>
         {props.game.img ? (
-          /* check if game img exists */ <img
-            className="game-img"
-            src={props.game.img}
-          />
+          <img className="game-img" src={props.game.img} />
         ) : (
           <img className="game-img" src={placeholderImg} />
         )}
@@ -31,7 +29,16 @@ const GameSessionCard = (props) => {
           <h2>{props.game.title}</h2>
           <p>{props.game.description}</p>
           <div className="user-circles">
-            <UserCircle user={""} />
+            {/* Crown Icon for the Leader */}
+            {props.game.currentPlayers.map((player, index) => (
+              <UserCircle
+                key={index}
+                user={{
+                  ...player,
+                  isLeader: index === 0, // First user will always have the crown   ////Lenny///
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>

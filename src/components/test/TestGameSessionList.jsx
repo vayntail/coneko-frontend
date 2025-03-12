@@ -1,4 +1,23 @@
 import { useFilters } from "../../context/FilterContext";
+import UserCircle from "../gameSession/UserCircle"; //Lenny///
+
+////////////lenny ///////////////
+const exampleSession = {
+  title: "Example Game",
+  description: "Sample description for testing.",
+  platform: "PC",
+  region: "NA",
+  currentPlayers: [
+    { pic: "", isSelected: false, isLeader: true }, // First player is always the leader
+    { pic: "", isSelected: false, isLeader: false }, // Empty Slot
+    { pic: "", isSelected: false, isLeader: false }, // Empty Slot
+    { pic: "", isSelected: false, isLeader: false }, // Empty Slot
+    { pic: "", isSelected: false, isLeader: false }, // Empty Slot
+  ],
+  maxPlayers: 5,
+};
+
+//////////////////Lenny////////////////
 
 /**
  * Simple component to display a single game session card
@@ -6,8 +25,17 @@ import { useFilters } from "../../context/FilterContext";
 const GameSessionCard = ({ session }) => {
   // Helper function to format the player count
   const formatPlayerCount = () => {
-    return `${session.currentPlayers}/${session.maxPlayers}`;
+    return `${session.currentPlayers.length}/${session.maxPlayers}`;
   };
+
+  /////////////// Lenny Additions /////////////////
+  const handleUserClick = (index) => {
+    session.currentPlayers = session.currentPlayers.map((player, i) => ({
+      ...player,
+      isSelected: i === index ? !player.isSelected : player.isSelected,
+    }));
+  };
+  //////////////////////////////////////////////////
 
   return (
     <div
@@ -27,29 +55,21 @@ const GameSessionCard = ({ session }) => {
 
       <p style={{ margin: "10px 0" }}>{session.description}</p>
 
+      {/* User Circles - Display horizontally */}
       <div
         style={{
           display: "flex",
-          flexWrap: "wrap",
-          gap: "5px",
+          gap: "8px",
           marginBottom: "10px",
         }}
       >
-        {/* Display genres */}
-        {session.genres &&
-          session.genres.map((genre) => (
-            <span
-              key={genre}
-              style={{
-                backgroundColor: "#e0e0e0",
-                padding: "3px 8px",
-                borderRadius: "4px",
-                fontSize: "12px",
-              }}
-            >
-              {genre}
-            </span>
-          ))}
+        {session.currentPlayers.map((player, index) => (
+          <UserCircle
+            key={index}
+            user={player}
+            onClick={() => handleUserClick(index)} //Lenny Additions
+          />
+        ))}
       </div>
 
       <div
