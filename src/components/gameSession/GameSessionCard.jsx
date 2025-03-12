@@ -26,9 +26,9 @@ const GameSessionCard = (props) => {
           )}
 
           {/* Display region(s) */}
-          {Array.isArray(game.regions) && game.regions.length > 0 ? (
+          {Array.isArray(game.gameRegion) && game.gameRegion.length > 0 ? (
             // If regions array exists, map through it
-            game.regions.map((region, index) => (
+            game.gameRegion.map((region, index) => (
               <div key={`region-${index}`}>{region}</div>
             ))
           ) : (
@@ -37,8 +37,8 @@ const GameSessionCard = (props) => {
           )}
 
           {/* Display genre(s) */}
-          {Array.isArray(game.genres) && game.genres.length > 0 ? (
-            game.genres.map((genre, index) => (
+          {Array.isArray(game.gameGenre) && game.gameGenre.length > 0 ? (
+            game.gameGenre.map((genre, index) => (
               <div key={`genre-${index}`}>{genre}</div>
             ))
           ) : (
@@ -48,7 +48,7 @@ const GameSessionCard = (props) => {
 
         {/* Check if game img exists */}
         {game.img ? (
-          <img className="game-img" src={game.img} alt={game.title} />
+          <img className="game-img" src={game.img} alt={game.gameTitle} />
         ) : (
           <img
             className="game-img"
@@ -58,8 +58,8 @@ const GameSessionCard = (props) => {
         )}
 
         <div className="mid-box">
-          <h2>{game.title || "Untitled Game"}</h2>
-          <p>{game.description || "No description available"}</p>
+          <h2>{game.gameTitle || "Untitled Game"}</h2>
+          <p>{game.requestDescription || "No description available"}</p>
           <div className="user-circles">
             <UserCircle user={""} />
           </div>
