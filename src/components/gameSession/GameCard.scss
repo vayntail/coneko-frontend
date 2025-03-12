@@ -1,7 +1,7 @@
 .card {
   display: flex;
   justify-content: space-between;
-  border: 1px solid black;
+  // border: 1px solid black;
 
   .filter-icons {
     display: flex;
@@ -26,4 +26,5 @@
 
 .flex-horizontal {
   display: flex;
+  gap: 50px;
 }
