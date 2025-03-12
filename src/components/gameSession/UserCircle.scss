@@ -14,12 +14,18 @@
   }
 }
 .user-circle {
-  width: 50px; /* Adjust size as desired */
-  height: 50px; /* Ensure uniform size */
-  border-radius: 50%;
+  height: 70px;
+  width: 70px;
+  border-radius: 60%;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid #ccc;
-  cursor: pointer; /* Adds click feedback */
+  background-color: #ddd; /* Default Grey */
+  border: 4px solid #0a78cd;
+  cursor: pointer;
+}
+
+.user-circle.selected {
+  background-color: #333; /* Dark Grey when selected */
+  border: 4px solid #333;
 }
