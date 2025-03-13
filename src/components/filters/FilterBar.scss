@@ -1,11 +1,11 @@
 /* FilterBar.scss - Main styles for the filter bar component */
 
 .filterBar {
-  background-color: #ddd;
+  background-color: #515962;
   padding: 10px;
-  border-radius: 4px;
+  border-radius: 10px;
   margin-bottom: 20px;
-  width: 100%;
+  width: 75%;
 
   .filtersContainer {
     display: flex;
@@ -41,8 +41,9 @@
   min-width: 140px;
 
   .dropdownBtn {
-    background-color: white;
-    border: 1px solid #ccc;
+    background-color: #35393e;
+    color: #c4c6c8;
+    border: 1px solid #35393e;
     border-radius: 4px;
     padding: 8px 12px;
     cursor: pointer;
@@ -54,7 +55,7 @@
     align-items: center;
 
     &:hover {
-      background-color: #f5f5f5;
+      background-color: #9a9c9e;
     }
   }
 
@@ -63,7 +64,7 @@
     top: 100%;
     left: 0;
     z-index: 10;
-    background-color: white;
+    background-color: #9a9c9e;
     border: 1px solid #ccc;
     border-radius: 4px;
     margin-top: 4px;
@@ -82,7 +83,7 @@
 
     /* Apply the background highlight to the entire item */
     &:hover {
-      background-color: #f0f0f0;
+      background-color: #9a9c9e;
     }
 
     &[aria-selected="true"] {
@@ -119,6 +120,8 @@
   min-width: 200px;
 
   .searchInput {
+    background-color: #9a9c9e;
+    color: #35393e;
     width: 100%;
     padding: 8px 40px 8px 12px; // padding for search icon
     border: 1px solid #ccc;

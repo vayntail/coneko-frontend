@@ -22,6 +22,19 @@
   .join-box {
     width: 200px;
   }
+
+  button {
+    width: 75px;
+    padding: 10px;
+    border-radius: 10px;
+    border: solid 1px black;
+    background-color: #adb7ee;
+    color: #14151c;
+
+    &:hover {
+      background-color: #0069d9;
+    }
+  }
 }
 
 .flex-horizontal {
