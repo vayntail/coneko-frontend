@@ -7,6 +7,7 @@ import FilterBar from "../../components/filters/FilterBar";
 import NewRequestButton from "../../components/form/NewRequestButton";
 import "./Home.scss";
 
+// test
 function Home() {
   // State to force refresh of the filter provider
   const [refreshKey, setRefreshKey] = useState(0);
