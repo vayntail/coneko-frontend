@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import GameSessionForm from "./HomeForm";
-
+import "../pages/Home/Home.css";
 export default () => {
   const [gameSessions, setGameSessions] = useState([]);
 

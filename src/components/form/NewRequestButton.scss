@@ -1,8 +1,8 @@
 /* NewRequestButton.scss - Styles for the create game button */
 
 .createGameBtn {
-  background-color: #007bff;
-  color: white;
+  background-color: #adb7ee;
+  color: #1b1d25;
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
@@ -13,6 +13,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
 
   &:hover {
     background-color: #0069d9;
