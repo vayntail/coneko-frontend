@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { gameSessionsAPI } from "../utils/api";
 
 // Mock Data, replace when backEnd API is running
 import {
@@ -43,7 +44,12 @@ export const FilterProvider = ({ children }) => {
   //State for loading status
   const [isLoading, setIsLoading] = useState(true);
 
-  //Load game session data
+  //State for Errors
+  const [error, setError] = useState(null);
+
+  //#region  (Old Locol storage data )
+  /*
+  //Load game session data from 
   useEffect(() => {
     // (Todo replace with backend API)
     const loadData = async () => {
@@ -81,19 +87,30 @@ export const FilterProvider = ({ children }) => {
 
     loadData();
   }, []); // Empty dependency array ensures this runs once on mount
+*/
+  //#endregion
 
-  //Apply filters whenever any filter changes
+  // Fetch game sessions from API
   useEffect(() => {
-    applyFilters();
-  }, [
-    platforms,
-    genres,
-    regions,
-    groupSize,
-    customTags,
-    searchTerm,
-    allSessions,
-  ]);
+    const fetchSessions = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const sessions = await gameSessionsAPI.getAllSessions();
+        setAllSessions(sessions);
+        setFilteredSessions(sessions);
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch sessions:", error);
+        setError("Failed to load game sessions. Please try again later");
+        setIsLoading(false);
+      }
+    };
+
+    fetchSessions();
+  }, []);
 
   /**
    * Function to apply all filters to the sessions
@@ -117,19 +134,28 @@ export const FilterProvider = ({ children }) => {
     // Filter by genres - if any genres are selected
     // A session matches if it has ANY of the selected genres
     if (genres.length > 0) {
-      results = results.filter(
-        (session) =>
-          // Check if any of the selected genres are in the session's genres array
-          session.gameGenre &&
-          genres.some((genre) => session.gameGenre.includes(genre))
-      );
+      results = results.filter((session) => {
+        // Handle both string and array formats
+        if (typeof session.gameGenre === "string") {
+          return genres.includes(session.gameGenre);
+        } else if (Array.isArray(session.gameGenre)) {
+          return genres.some((genre) => session.gameGenre.includes(genre));
+        }
+        return false;
+      });
     }
 
     // Filter by regions - if any regions are selected
     if (regions.length > 0) {
-      results = results.filter(
-        (session) => regions.includes(session.gameRegion[0]) // set to first region from list
-      );
+      results = results.filter((session) => {
+        // Handle both string and array formats
+        if (typeof session.gameRegion === "string") {
+          return regions.includes(session.gameRegion);
+        } else if (Array.isArray(session.gameRegion)) {
+          return regions.some((region) => session.gameRegion.includes(region));
+        }
+        return false;
+      });
     }
 
     // Filter by custom tags - if any custom tags are selected
@@ -146,14 +172,14 @@ export const FilterProvider = ({ children }) => {
     if (groupSize) {
       results = results.filter((session) => {
         // Get the maximum player capacity
-        const maxCapacity = session.maxPlayers;
+        const maxCapacity = session.maxPlayers || session.maxPlayers;
 
         // Apply different filters based on group size selection
         switch (groupSize) {
           case "any":
             return true; // Match everything
           case "small":
-            return maxCapacity <= 2; // For small groups (1-2 players)
+            return maxCapacity <= 2; // For small groups (2 players)
           case "medium":
             return maxCapacity > 2 && maxCapacity <= 5; // For medium groups (2-5 players)
           case "large":
@@ -181,6 +207,21 @@ export const FilterProvider = ({ children }) => {
     setFilteredSessions(results);
   };
 
+  //Apply filters whenever any filter changes
+  useEffect(() => {
+    if (allSessions.length > 0) {
+      applyFilters();
+    }
+  }, [
+    platforms,
+    genres,
+    regions,
+    groupSize,
+    customTags,
+    searchTerm,
+    allSessions,
+  ]);
+
   // Function to reset all filters to their default state
   const resetFilters = () => {
     setPlatforms([]);
@@ -189,6 +230,23 @@ export const FilterProvider = ({ children }) => {
     setGroupSize("");
     setCustomTags([]);
     setSearchTerm("");
+  };
+
+  //Refreshes data from the API
+  const refreshSessions = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const sessions = await gameSessionsAPI.getAllSessions();
+      setAllSessions(sessions);
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Failed to refresh sessions:", error);
+      setError("Failed to refresh game sessions. Please try again later.");
+      setIsLoading(false);
+    }
   };
 
   // Create the value object that will be provided to components
@@ -218,9 +276,11 @@ export const FilterProvider = ({ children }) => {
     allSessions,
     filteredSessions,
     isLoading,
+    error,
 
     // Reset function
     resetFilters,
+    refreshSessions,
   };
 
   // Return the Provider component with the context value
