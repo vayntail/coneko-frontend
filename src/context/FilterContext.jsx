@@ -98,6 +98,7 @@ export const FilterProvider = ({ children }) => {
         setError(null);
 
         const sessions = await gameSessionsAPI.getAllSessions();
+        console.log("API Response:", sessions);
         setAllSessions(sessions);
         setFilteredSessions(sessions);
 

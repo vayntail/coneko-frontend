@@ -5,19 +5,37 @@ const api = axios.create({
   baseURL: "https://coneko-api.onrender.com",
   headers: {
     "Content-Type": "application/json",
-    "x-api-key": import.meta.env.VITE_API_KEY, //imports API key from env
+    "X-API-Key": import.meta.env.VITE_API_KEY,
   },
 });
+
+//Debug to see if API Key is being sent
+console.log("API Key present:", !!import.meta.env.VITE_API_KEY);
 
 //Game sessions (request-ticket) endpoints
 export const gameSessionsAPI = {
   //Get all game sessions
   getAllSessions: async () => {
     try {
+      console.log("Making API request with headers:", {
+        ...api.defaults.headers,
+        "x-api-key": "[PRESENT]", // Don't log the actual key
+      });
+
       const response = await api.get("/api/request-ticket");
       return response.data;
     } catch (error) {
       console.error("Error fetching sessions:", error);
+
+      // More detailed error logging
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+        console.error("Response headers:", error.response.headers);
+      }
+
       throw error;
     }
   },
@@ -25,7 +43,7 @@ export const gameSessionsAPI = {
   //Get a single session by ID (single request ticket)
   getSessionById: async (id) => {
     try {
-      const response = await api.get(`api/request-ticket/message/${id}`);
+      const response = await api.get(`/api/request-ticket/message/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching session ${id}:`, error);
