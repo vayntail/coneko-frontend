@@ -1,26 +1,29 @@
-// main home page.
+//main home page
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import GameSessionList from "../../components/gameSession/GameSessionList";
 import { FilterProvider } from "../../context/FilterContext";
 import FilterBar from "../../components/filters/FilterBar";
 import NewRequestButton from "../../components/form/NewRequestButton";
 import "./Home.scss";
 
-// test
 function Home() {
-  // State to force refresh of the filter provider
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [notification, setNotification] = useState(null);
 
   // Handler for when a new session is created
   const handleSessionCreated = (newSession) => {
     console.log("New session created:", newSession);
 
-    // Force the FilterProvider to reload by changing its key prop
-    setRefreshKey((prevKey) => prevKey + 1);
+    // Show success notification
+    setNotification({
+      type: "success",
+      message: "Game session created successfully!",
+    });
 
-    // Optional: show a success message
-    alert("Game session created successfully!");
+    // Clear notification after 3 seconds
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
   };
 
   return (
@@ -29,8 +32,7 @@ function Home() {
         <h2>Groups</h2>
         <h2>Players</h2>
       </div>
-      <br />
-      <br />
+
       <div className="featured">
         <form className="slogan">
           <h3>Daily Changing Slogan</h3>
@@ -38,11 +40,16 @@ function Home() {
           <input type="search" placeholder="Group Finder" />
         </form>
       </div>
-      <br />
-      <br />
 
-      {/* main games requests list */}
-      <FilterProvider key={`filter-provider-${refreshKey}`}>
+      {/* Show notification if exists */}
+      {notification && (
+        <div className={`notification ${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
+
+      {/* Main game requests list */}
+      <FilterProvider>
         {/* Add the NewRequestButton at the top right */}
         <div className="headerActions">
           <NewRequestButton onSessionCreated={handleSessionCreated} />

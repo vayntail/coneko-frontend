@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import "./NewRequestModal.scss";
+import { gameSessionsAPI } from "../../utils/api";
+import { useFilters } from "../../context/FilterContext";
 
 // Mock Data (to be replaced with backend API Calls)
 import {
@@ -31,21 +33,22 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
     platforms: [], // Changed from platform (string) to platforms (array)
     genres: [], // Changed from gameGenre (string) to genres (array)
     regions: [], // Changed from gameRegion (string) to regions (array)
-    playersNeeded: 1,
+    playersNeeded: 2,
     inviteCode: "",
     customTags: [],
     joinType: "open", // "open" (anyone can join) or "request" (request access)
     status: "ongoing", // Default status
   });
 
-  //State for tracking validation errors
+  // State for error tracking and submission
   const [errors, setErrors] = useState({});
-
-  //State for tracking form submission
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
-  // We're removing the scroll lock functionality completely
-  // No useEffect hook for body scrolling
+  // Get the refresh function from context to reload data after creation
+  // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+  const { refreshSessions, createLocalSession } = useFilters();
+  // ==============================================================================================
 
   //Handles input changes for text, number and, select fields
   const handleInputChange = (evt) => {
@@ -105,16 +108,17 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
       newErrors.inviteCode = "Invite code is required";
 
     // Validate players needed (must be at least 1)
-    if (!formData.playersNeeded || formData.playersNeeded < 1) {
+    if (!formData.playersNeeded || formData.playersNeeded < 2) {
       newErrors.playersNeeded = "At least 1 player is needed";
     }
 
     return newErrors;
   };
 
-  //Handles form submission
-  const handleSubmit = (evt) => {
+  //Handles form submission to API
+  const handleSubmit = async (evt) => {
     evt.preventDefault();
+    setSubmitError(null);
 
     // Validate the form
     const formErrors = validateForm();
@@ -129,76 +133,63 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
     setIsSubmitting(true);
 
     try {
-      const newGameSession = {
-        id: Date.now().toString(), // Temporary ID (will be assigned by the backend)
+      // Create API-compatible data object
+      const apiData = {
+        user: "Player123", // Will need to be replaced with actual user info
+        playersNeeded: formData.playersNeeded,
         gameTitle: formData.gameTitle,
-        requestDescription: formData.description,
-        // Use the primary platform as the main platform (for filtering purposes)
-        platform: formData.platforms.length > 0 ? formData.platforms[0] : "",
-        // Store all platforms for display
-        platforms: formData.platforms,
-        // Store all genres
-        gameGenre: formData.genres,
-        // Use the primary region as the main region (for filtering purposes)
-        // region: formData.regions.length > 0 ? formData.regions[0] : "", REMOVED THIS SINCE I INDEX [0] IN FILTER CONTEXT INSTEAD!
-        // Store all regions
-        gameRegion: formData.regions,
-        maxPlayers: formData.playersNeeded,
-        currentPlayers: 1, // Creator is the first player
-        inviteCode: formData.inviteCode,
-        customTags: formData.customTags || [], // Ensure customTags is always an array
+        requestDescription: formData.description, // Map to the correct field
+        platform: formData.platforms[0] || "",
+        gameGenre: formData.genres[0] || "",
+        gameRegion: formData.regions[0] || "",
         status: formData.status,
-        joinType: formData.joinType,
-        createdAt: new Date().toISOString(),
-        scheduledTime: new Date().toISOString(), // Default to now
-        img: placeholderImg, // Add a placeholder image for new sessions
+        inviteCode: formData.inviteCode,
+        // Optional fields based on your schema
+        gameImage: "category", // Default from your schema
+        customTags: formData.customTags[0] || "casual", // Default from your schema
       };
 
-      // Get existing sessions
-      let existingSessions = [];
+      // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+      let newSession;
+
+      // Try API first, fall back to localStorage
       try {
-        existingSessions =
-          JSON.parse(localStorage.getItem("gameSessions")) || [];
-      } catch (error) {
-        console.error("Error parsing existing sessions:", error);
-        existingSessions = [];
+        // Try to use the API
+        newSession = await gameSessionsAPI.createSession(apiData);
+        console.log("Session created via API:", newSession);
+        await refreshSessions();
+      } catch (apiError) {
+        // On API failure, use localStorage
+        console.warn("API failed, using localStorage instead:", apiError);
+        newSession = createLocalSession(apiData);
+        console.log("Session created locally:", newSession);
       }
 
-      // =============Temporary: Save to localStorage ===
-      // (This will be replaced with an API call to POST /api/request-ticket)
-      localStorage.setItem(
-        "gameSessions",
-        JSON.stringify([...existingSessions, newGameSession])
-      );
+      // Notify parent component
+      if (onSessionCreated) {
+        onSessionCreated(newSession);
+      }
+      // ==============================================================================================
 
-      //Creating the illusion of loading (can replace with a loading component for effect)
-      setTimeout(() => {
-        //Notify parent component that a session was created
-        if (onSessionCreated) {
-          onSessionCreated(newGameSession);
-        }
+      // Reset form and close modal
+      setFormData({
+        gameTitle: "",
+        description: "",
+        platforms: [],
+        genres: [],
+        regions: [],
+        playersNeeded: 2,
+        inviteCode: "",
+        customTags: [],
+        joinType: "open",
+        status: "ongoing",
+      });
 
-        // Reset form and close modal
-        setFormData({
-          gameTitle: "",
-          description: "",
-          platforms: [], // Reset platforms array
-          genres: [], // Reset genres array
-          regions: [], // Reset regions array
-          playersNeeded: 1,
-          inviteCode: "",
-          customTags: [],
-          joinType: "open",
-          status: "ongoing",
-        });
-        setIsSubmitting(false);
-        onClose();
-      }, 500); //1/2 a second adjust time if needed for the future loading component
+      setIsSubmitting(false);
+      onClose();
     } catch (error) {
       console.error("Error creating game session:", error);
-      setErrors({
-        submit: "Failed to create game session. Please try again.",
-      });
+      setSubmitError("Failed to create game session. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -525,7 +516,7 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                   value={formData.playersNeeded}
                   onChange={handleInputChange}
                   placeholder="#Of Players Needed"
-                  min="1"
+                  min="2"
                   max="100"
                   className={errors.playersNeeded ? "error" : ""}
                 />
