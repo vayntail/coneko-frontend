@@ -33,7 +33,7 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
     platforms: [], // Changed from platform (string) to platforms (array)
     genres: [], // Changed from gameGenre (string) to genres (array)
     regions: [], // Changed from gameRegion (string) to regions (array)
-    playersNeeded: 1,
+    playersNeeded: 2,
     inviteCode: "",
     customTags: [],
     joinType: "open", // "open" (anyone can join) or "request" (request access)
@@ -46,7 +46,9 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
   const [submitError, setSubmitError] = useState(null);
 
   // Get the refresh function from context to reload data after creation
-  const { refreshSessions } = useFilters();
+  // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+  const { refreshSessions, createLocalSession } = useFilters();
+  // ==============================================================================================
 
   //Handles input changes for text, number and, select fields
   const handleInputChange = (evt) => {
@@ -106,7 +108,7 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
       newErrors.inviteCode = "Invite code is required";
 
     // Validate players needed (must be at least 1)
-    if (!formData.playersNeeded || formData.playersNeeded < 1) {
+    if (!formData.playersNeeded || formData.playersNeeded < 2) {
       newErrors.playersNeeded = "At least 1 player is needed";
     }
 
@@ -147,25 +149,36 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
         customTags: formData.customTags[0] || "casual", // Default from your schema
       };
 
-      //Submit to API
-      const newSession = await gameSessionsAPI.createSession(apiData);
+      // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+      let newSession;
 
-      //Refresh sessions list
-      await refreshSessions();
+      // Try API first, fall back to localStorage
+      try {
+        // Try to use the API
+        newSession = await gameSessionsAPI.createSession(apiData);
+        console.log("Session created via API:", newSession);
+        await refreshSessions();
+      } catch (apiError) {
+        // On API failure, use localStorage
+        console.warn("API failed, using localStorage instead:", apiError);
+        newSession = createLocalSession(apiData);
+        console.log("Session created locally:", newSession);
+      }
 
-      //Notify parent component
+      // Notify parent component
       if (onSessionCreated) {
         onSessionCreated(newSession);
       }
+      // ==============================================================================================
 
       // Reset form and close modal
       setFormData({
         gameTitle: "",
-        requestDescription: "",
+        description: "",
         platforms: [],
         genres: [],
         regions: [],
-        playersNeeded: 1,
+        playersNeeded: 2,
         inviteCode: "",
         customTags: [],
         joinType: "open",
@@ -503,7 +516,7 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                   value={formData.playersNeeded}
                   onChange={handleInputChange}
                   placeholder="#Of Players Needed"
-                  min="1"
+                  min="2"
                   max="100"
                   className={errors.playersNeeded ? "error" : ""}
                 />

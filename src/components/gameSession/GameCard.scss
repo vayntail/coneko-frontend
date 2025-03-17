@@ -41,3 +41,18 @@
   display: flex;
   gap: 50px;
 }
+
+/* ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ============================== */
+.local-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #ffd700;
+  color: #333;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 10;
+}
+/* ============================================================================================== */

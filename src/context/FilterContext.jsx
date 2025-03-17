@@ -47,48 +47,17 @@ export const FilterProvider = ({ children }) => {
   //State for Errors
   const [error, setError] = useState(null);
 
-  //#region  (Old Locol storage data )
-  /*
-  //Load game session data from 
-  useEffect(() => {
-    // (Todo replace with backend API)
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-
-        // First try to load from localStorage
-        let sessions = [];
-        try {
-          const localSessions = localStorage.getItem("gameSessions");
-          if (localSessions) {
-            sessions = JSON.parse(localSessions);
-            console.log("Loaded sessions from localStorage:", sessions.length);
-          }
-        } catch (error) {
-          console.error("Error loading from localStorage:", error);
-        }
-
-        // If no localStorage data or empty array, fall back to mock data
-        if (sessions.length === 0) {
-          console.log("No localStorage data, loading mock data");
-          const module = await import("../assets/mockData/gameSessions");
-          sessions = module.default;
-        }
-
-        setAllSessions(sessions);
-        setFilteredSessions(sessions); //Start with all sessions
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error(`Failed to load session data`, error);
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, []); // Empty dependency array ensures this runs once on mount
-*/
-  //#endregion
+  // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+  // Add localStorage sessions state
+  const [localSessions, setLocalSessions] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("localSessions")) || [];
+    } catch (e) {
+      console.error("Error loading local sessions:", e);
+      return [];
+    }
+  });
+  // ==============================================================================================
 
   // Fetch game sessions from API
   useEffect(() => {
@@ -100,28 +69,59 @@ export const FilterProvider = ({ children }) => {
         const sessions = await gameSessionsAPI.getAllSessions();
         console.log("API Response:", sessions);
 
+        // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
         // Check if the response is an array
+        let apiSessions = [];
         if (Array.isArray(sessions) && sessions.length > 0) {
-          setAllSessions(sessions);
-          setFilteredSessions(sessions);
+          apiSessions = sessions;
         } else {
           console.warn(
             "API did not return valid session data. Using empty array."
           );
-          setAllSessions([]);
-          setFilteredSessions([]);
         }
+
+        // Combine API sessions with localStorage sessions
+        const combinedSessions = [
+          ...apiSessions,
+          ...localSessions.map((session) => ({
+            ...session,
+            isLocalOnly: true,
+          })),
+        ];
+
+        setAllSessions(combinedSessions);
+        setFilteredSessions(combinedSessions);
+        // ==============================================================================================
 
         setIsLoading(false);
       } catch (error) {
         console.error("Failed to fetch sessions:", error);
-        setError("Failed to load game sessions. Please try again later");
+
+        // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+        // Use local sessions when API fails
+        if (localSessions.length > 0) {
+          console.log(
+            "Using local sessions due to API error:",
+            localSessions.length
+          );
+          setAllSessions(localSessions);
+          setFilteredSessions(localSessions);
+          setError("API unavailable. Showing locally stored sessions.");
+        } else {
+          // ==============================================================================================
+          setError("Failed to load game sessions. Please try again later");
+          // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+        }
+        // ==============================================================================================
+
         setIsLoading(false);
       }
     };
 
     fetchSessions();
-  }, []);
+    // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+  }, [localSessions]); // Add localSessions as dependency
+  // ==============================================================================================
 
   /**
    * Function to apply all filters to the sessions
@@ -237,6 +237,28 @@ export const FilterProvider = ({ children }) => {
     }
   };
 
+  // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+  // Add function to create local sessions
+  const createLocalSession = (sessionData) => {
+    const newSession = {
+      ...sessionData,
+      id: `local-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      isLocalOnly: true,
+    };
+
+    const updatedSessions = [...localSessions, newSession];
+    setLocalSessions(updatedSessions);
+    localStorage.setItem("localSessions", JSON.stringify(updatedSessions));
+
+    // Update allSessions and filtered sessions
+    setAllSessions((prev) => [...prev, newSession]);
+    setFilteredSessions((prev) => [...prev, newSession]);
+
+    return newSession;
+  };
+  // ==============================================================================================
+
   // Create the value object that will be provided to components
   const contextValue = {
     // Filter states and setter functions
@@ -269,6 +291,10 @@ export const FilterProvider = ({ children }) => {
     // Reset function
     resetFilters,
     refreshSessions,
+
+    // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+    createLocalSession,
+    // ==============================================================================================
   };
 
   // Return the Provider component with the context value

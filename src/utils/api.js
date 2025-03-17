@@ -26,7 +26,7 @@ export const gameSessionsAPI = {
     }
   },
 
-  // Update your getAllSessions function to log the response more clearly
+  //  getAllSessions function (get all request-tickets)
   getAllSessions: async () => {
     try {
       console.log("Making API request...");

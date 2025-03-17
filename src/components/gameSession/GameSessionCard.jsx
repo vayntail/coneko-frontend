@@ -13,6 +13,10 @@ const GameSessionCard = (props) => {
 
   return (
     <div className="card flex-horizontal">
+      {/* ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ============================== */}
+      {game.isLocalOnly && <div className="local-badge">Local</div>}
+      {/* ============================================================================================== */}
+
       <div className="flex-horizontal">
         <div className="filter-icons">
           {/* Display platform */}
