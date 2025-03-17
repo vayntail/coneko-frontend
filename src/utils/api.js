@@ -5,7 +5,7 @@ const api = axios.create({
   baseURL: "https://coneko-api.onrender.com",
   headers: {
     "Content-Type": "application/json",
-    "X-API-Key": import.meta.env.VITE_API_KEY,
+    "x-api-key": import.meta.env.VITE_API_KEY,
   },
 });
 
@@ -14,28 +14,30 @@ console.log("API Key present:", !!import.meta.env.VITE_API_KEY);
 
 //Game sessions (request-ticket) endpoints
 export const gameSessionsAPI = {
-  //Get all game sessions
+  //Seed data route
+  seedDatabase: async () => {
+    try {
+      const response = await api.get("/request-ticket/seed");
+      console.log("Seed response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error seeding database:", error);
+      throw error;
+    }
+  },
+
+  // Update your getAllSessions function to log the response more clearly
   getAllSessions: async () => {
     try {
-      console.log("Making API request with headers:", {
-        ...api.defaults.headers,
-        "x-api-key": "[PRESENT]", // Don't log the actual key
-      });
+      console.log("Making API request...");
+      const response = await api.get("/request-ticket");
+      console.log("Raw API Response:", response);
+      console.log("Response data type:", typeof response.data);
+      console.log("Response data:", response.data);
 
-      const response = await api.get("/api/request-ticket");
       return response.data;
     } catch (error) {
       console.error("Error fetching sessions:", error);
-
-      // More detailed error logging
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error("Response data:", error.response.data);
-        console.error("Response status:", error.response.status);
-        console.error("Response headers:", error.response.headers);
-      }
-
       throw error;
     }
   },
@@ -43,7 +45,7 @@ export const gameSessionsAPI = {
   //Get a single session by ID (single request ticket)
   getSessionById: async (id) => {
     try {
-      const response = await api.get(`/api/request-ticket/message/${id}`);
+      const response = await api.get(`/request-ticket/message/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching session ${id}:`, error);
@@ -54,7 +56,7 @@ export const gameSessionsAPI = {
   //Create a new session (request-ticket)
   createSession: async (sessionData) => {
     try {
-      const response = await api.post(`/api/request-ticket`, sessionData);
+      const response = await api.post(`/request-ticket`, sessionData);
       return response.data;
     } catch (error) {
       console.error("Error creating session:", error);
@@ -65,7 +67,7 @@ export const gameSessionsAPI = {
   //Update a session (request-ticket)
   updateSession: async (id, sessionData) => {
     try {
-      const response = await api.put(`/api/request-ticket/${id}`, sessionData);
+      const response = await api.put(`/request-ticket/${id}`, sessionData);
       return response.data;
     } catch (error) {
       console.error(`Error updating session ${id}:`, error);
@@ -76,7 +78,7 @@ export const gameSessionsAPI = {
   //Delete a session (request-ticket)
   deleteSession: async (id) => {
     try {
-      const response = await api.delete(`/api/request-ticket/${id}`);
+      const response = await api.delete(`/request-ticket/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Error deleting session ${id}:`, error);

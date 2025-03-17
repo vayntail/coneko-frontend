@@ -99,8 +99,18 @@ export const FilterProvider = ({ children }) => {
 
         const sessions = await gameSessionsAPI.getAllSessions();
         console.log("API Response:", sessions);
-        setAllSessions(sessions);
-        setFilteredSessions(sessions);
+
+        // Check if the response is an array
+        if (Array.isArray(sessions) && sessions.length > 0) {
+          setAllSessions(sessions);
+          setFilteredSessions(sessions);
+        } else {
+          console.warn(
+            "API did not return valid session data. Using empty array."
+          );
+          setAllSessions([]);
+          setFilteredSessions([]);
+        }
 
         setIsLoading(false);
       } catch (error) {
@@ -118,85 +128,63 @@ export const FilterProvider = ({ children }) => {
    * This runs whenever any filter criteria changes (Another option is chosen or removed)
    */
 
+  //applyFilters function
   const applyFilters = () => {
-    //If no data loaded yet, do nothing
     if (allSessions.length === 0) return;
 
-    //Start with all sessions
     let results = [...allSessions];
 
-    //Filter by platforms - if any platforms are selected
+    // Filter by platforms
     if (platforms.length > 0) {
       results = results.filter((session) =>
         platforms.includes(session.platform)
       );
     }
 
-    // Filter by genres - if any genres are selected
-    // A session matches if it has ANY of the selected genres
+    // Filter by genres
     if (genres.length > 0) {
-      results = results.filter((session) => {
-        // Handle both string and array formats
-        if (typeof session.gameGenre === "string") {
-          return genres.includes(session.gameGenre);
-        } else if (Array.isArray(session.gameGenre)) {
-          return genres.some((genre) => session.gameGenre.includes(genre));
-        }
-        return false;
-      });
+      results = results.filter((session) => genres.includes(session.gameGenre));
     }
 
-    // Filter by regions - if any regions are selected
+    // Filter by regions
     if (regions.length > 0) {
-      results = results.filter((session) => {
-        // Handle both string and array formats
-        if (typeof session.gameRegion === "string") {
-          return regions.includes(session.gameRegion);
-        } else if (Array.isArray(session.gameRegion)) {
-          return regions.some((region) => session.gameRegion.includes(region));
-        }
-        return false;
-      });
-    }
-
-    // Filter by custom tags - if any custom tags are selected
-    // A session matches if it has ANY of the selected custom tags
-    if (customTags.length > 0) {
-      results = results.filter(
-        (session) =>
-          session.customTags &&
-          customTags.some((tag) => session.customTags.includes(tag))
+      results = results.filter((session) =>
+        regions.includes(session.gameRegion)
       );
     }
 
-    // Filter by group size - if a group size is selected
+    // Filter by custom tags
+    if (customTags.length > 0) {
+      results = results.filter((session) =>
+        customTags.includes(session.customTags)
+      );
+    }
+
+    // Filter by group size
     if (groupSize) {
       results = results.filter((session) => {
-        // Get the maximum player capacity
-        const maxCapacity = session.maxPlayers || session.maxPlayers;
+        const maxCapacity = session.playersNeeded;
 
-        // Apply different filters based on group size selection
         switch (groupSize) {
           case "any":
-            return true; // Match everything
+            return true;
           case "small":
-            return maxCapacity <= 2; // For small groups (2 players)
+            return maxCapacity <= 2;
           case "medium":
-            return maxCapacity > 2 && maxCapacity <= 5; // For medium groups (2-5 players)
+            return maxCapacity > 2 && maxCapacity <= 5;
           case "large":
-            return maxCapacity > 5; // For large groups (5+ players)
+            return maxCapacity > 5;
           default:
             return true;
         }
       });
     }
 
-    // Filter by search term - if a search term is entered
+    // Filter by search term
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase().trim();
       results = results.filter(
         (session) =>
-          // Search in title and description
           (session.gameTitle &&
             session.gameTitle.toLowerCase().includes(term)) ||
           (session.requestDescription &&
@@ -204,7 +192,6 @@ export const FilterProvider = ({ children }) => {
       );
     }
 
-    // Update the filtered sessions state
     setFilteredSessions(results);
   };
 

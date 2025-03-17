@@ -26,8 +26,8 @@ const GameSessionCard = (props) => {
         </div>
 
         {/* Check if game img exists */}
-        {game.img ? (
-          <img className="game-img" src={game.img} alt={game.gameTitle} />
+        {game.gameImage ? (
+          <img className="game-img" src={game.gameImage} alt={game.gameTitle} />
         ) : (
           <img
             className="game-img"
@@ -46,10 +46,14 @@ const GameSessionCard = (props) => {
       </div>
 
       <div className="join-box">
-        <p>{game.scheduledTime || "No time specified"}</p>
+        <p>
+          {game.scheduledTime
+            ? new Date(game.scheduledTime).toLocaleString()
+            : "No time specified"}
+        </p>
         <p>
           {/* Display current/max players */}
-          {game.currentPlayers || 1}/{game.playersNeeded || 0}
+          1/{game.playersNeeded || 0}
         </p>
         <button onClick={onJoinButtonClick}>Join</button>
       </div>

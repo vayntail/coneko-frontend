@@ -25,8 +25,11 @@ const GameSessionList = () => {
     );
   }
 
+  // Check to ensure filteredSessions is an array
+  const sessionsArray = Array.isArray(filteredSessions) ? filteredSessions : [];
+
   // Show message if no sessions found
-  if (filteredSessions.length === 0) {
+  if (sessionsArray.length === 0) {
     return (
       <div className="no-results">
         <p>No game sessions found matching your filters.</p>
@@ -38,7 +41,7 @@ const GameSessionList = () => {
   // Render the list of sessions
   return (
     <ul className="game-session-list">
-      {filteredSessions.map((gameSession) => (
+      {sessionsArray.map((gameSession) => (
         <li
           key={gameSession._id || gameSession.id}
           className="game-session-item"

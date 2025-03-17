@@ -134,15 +134,17 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
       // Create API-compatible data object
       const apiData = {
         user: "Player123", // Will need to be replaced with actual user info
-        gameTitle: formData.gameTitle,
-        requestDescription: formData.requestDescription,
-        platform: formData.platforms[0] || "", // Use first selected platform
-        gameGenre: formData.genres[0] || "", // Use first selected genre
-        gameRegion: formData.regions[0] || "", // Use first selected region
         playersNeeded: formData.playersNeeded,
-        inviteCode: formData.inviteCode,
+        gameTitle: formData.gameTitle,
+        requestDescription: formData.description, // Map to the correct field
+        platform: formData.platforms[0] || "",
+        gameGenre: formData.genres[0] || "",
+        gameRegion: formData.regions[0] || "",
         status: formData.status,
-        // Note: customTags and joinType not included in API spec (will need to update when backEnd adds them)
+        inviteCode: formData.inviteCode,
+        // Optional fields based on your schema
+        gameImage: "category", // Default from your schema
+        customTags: formData.customTags[0] || "casual", // Default from your schema
       };
 
       //Submit to API
