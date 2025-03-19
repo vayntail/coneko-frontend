@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import "./NewRequestModal.scss";
-import { gameSessionsAPI } from "../../utils/api";
 import { useFilters } from "../../context/FilterContext";
+import "./NewRequestModal.scss";
 
-// Mock Data (to be replaced with backend API Calls)
+// Import options for dropdown fields
 import {
   platformOptions,
   genreOptions,
@@ -14,47 +13,47 @@ import {
 // Import a placeholder image for new sessions
 import placeholderImg from "../../assets/placeholders/placeholder-img.png";
 
-//What is this?
-/* *This component handles:
-  Displaying the form in a modal overlay
-  Collecting all game session data
-  Validating required fields
-  Submitting the form data (temporarily to localStorage, will connect to API later)
-  Notifying the parent component when the form is submitted or canceled */
-
+/**
+ * This component handles:
+ * - Displaying the form in a modal overlay
+ * - Collecting all game session data
+ * - Validating required fields
+ * - Submitting the form data to the API (with localStorage fallback)
+ * - Notifying the parent component when the form is submitted or canceled
+ */
 const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
-  //If the model is not open, don't render anything
+  // If the modal is not open, don't render anything
   if (!isOpen) return null;
 
-  // Initialize form state with default values - now using arrays for multiple selections
+  // Get the createSession function from context
+  const { createSession, error: contextError } = useFilters();
+
+  // Initialize form state with default values
   const [formData, setFormData] = useState({
     gameTitle: "",
     description: "",
-    platforms: [], // Changed from platform (string) to platforms (array)
-    genres: [], // Changed from gameGenre (string) to genres (array)
-    regions: [], // Changed from gameRegion (string) to regions (array)
-    playersNeeded: 2,
+    platforms: [],
+    genres: [],
+    regions: [],
+    playersNeeded: 1,
     inviteCode: "",
     customTags: [],
     joinType: "open", // "open" (anyone can join) or "request" (request access)
     status: "ongoing", // Default status
   });
 
-  // State for error tracking and submission
+  // State for tracking validation errors
   const [errors, setErrors] = useState({});
+
+  // State for tracking form submission and API status
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  const [apiError, setApiError] = useState(null);
 
-  // Get the refresh function from context to reload data after creation
-  // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
-  const { refreshSessions, createLocalSession } = useFilters();
-  // ==============================================================================================
-
-  //Handles input changes for text, number and, select fields
+  // Handles input changes for text, number and select fields
   const handleInputChange = (evt) => {
     const { name, value, type } = evt.target;
 
-    //Convert to number for number inputs
+    // Convert to number for number inputs
     const processedValue = type === "number" ? parseInt(value, 10) : value;
 
     setFormData({
@@ -62,7 +61,7 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
       [name]: processedValue,
     });
 
-    //Clear error for this field if it exists
+    // Clear error for this field if it exists
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -71,7 +70,7 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
     }
   };
 
-  //Handle changes to custom tag selections
+  // Handle changes to custom tag selections
   const handleTagToggle = (tag) => {
     const newTags = formData.customTags.includes(tag)
       ? formData.customTags.filter((t) => t !== tag)
@@ -91,7 +90,7 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
     });
   };
 
-  //Validates the form data
+  // Validates the form data
   const validateForm = () => {
     const newErrors = {};
 
@@ -108,17 +107,16 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
       newErrors.inviteCode = "Invite code is required";
 
     // Validate players needed (must be at least 1)
-    if (!formData.playersNeeded || formData.playersNeeded < 2) {
+    if (!formData.playersNeeded || formData.playersNeeded < 1) {
       newErrors.playersNeeded = "At least 1 player is needed";
     }
 
     return newErrors;
   };
 
-  //Handles form submission to API
+  // Handles form submission
   const handleSubmit = async (evt) => {
     evt.preventDefault();
-    setSubmitError(null);
 
     // Validate the form
     const formErrors = validateForm();
@@ -129,70 +127,68 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
       return;
     }
 
+    // Reset API error
+    setApiError(null);
+
     // No errors, proceed with submission
     setIsSubmitting(true);
 
     try {
-      // Create API-compatible data object
-      const apiData = {
-        user: "Player123", // Will need to be replaced with actual user info
-        playersNeeded: formData.playersNeeded,
-        gameTitle: formData.gameTitle,
-        requestDescription: formData.description, // Map to the correct field
-        platform: formData.platforms[0] || "",
-        gameGenre: formData.genres[0] || "",
-        gameRegion: formData.regions[0] || "",
-        status: formData.status,
-        inviteCode: formData.inviteCode,
-        // Optional fields based on your schema
-        gameImage: "category", // Default from your schema
-        customTags: formData.customTags[0] || "casual", // Default from your schema
+      // Prepare the session data
+      const sessionData = {
+        ...formData,
+        // Add fields required by GameSessionCard
+        maxPlayers: formData.playersNeeded,
+        currentPlayers: 1,
+        img: placeholderImg,
+        createdAt: new Date().toISOString(),
+        scheduledTime: new Date().toISOString(),
+        // Add a random user (will be replaced with auth later)
+        user: "Guest_" + Math.floor(Math.random() * 1000),
       };
 
-      // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
-      let newSession;
+      // Create the session via context (which handles API + fallback)
+      const newSession = await createSession(sessionData);
 
-      // Try API first, fall back to localStorage
-      try {
-        // Try to use the API
-        newSession = await gameSessionsAPI.createSession(apiData);
-        console.log("Session created via API:", newSession);
-        await refreshSessions();
-      } catch (apiError) {
-        // On API failure, use localStorage
-        console.warn("API failed, using localStorage instead:", apiError);
-        newSession = createLocalSession(apiData);
-        console.log("Session created locally:", newSession);
-      }
+      // Show success status briefly before closing
+      setTimeout(() => {
+        // Notify parent that a session was created
+        if (onSessionCreated) {
+          onSessionCreated(newSession);
+        }
 
-      // Notify parent component
-      if (onSessionCreated) {
-        onSessionCreated(newSession);
-      }
-      // ==============================================================================================
+        // Reset form and close modal
+        setFormData({
+          gameTitle: "",
+          description: "",
+          platforms: [],
+          genres: [],
+          regions: [],
+          playersNeeded: 1,
+          inviteCode: "",
+          customTags: [],
+          joinType: "open",
+          status: "ongoing",
+        });
 
-      // Reset form and close modal
-      setFormData({
-        gameTitle: "",
-        description: "",
-        platforms: [],
-        genres: [],
-        regions: [],
-        playersNeeded: 2,
-        inviteCode: "",
-        customTags: [],
-        joinType: "open",
-        status: "ongoing",
-      });
-
-      setIsSubmitting(false);
-      onClose();
+        setIsSubmitting(false);
+        onClose();
+      }, 500);
     } catch (error) {
       console.error("Error creating game session:", error);
-      setSubmitError("Failed to create game session. Please try again.");
+      setApiError(
+        error.message || "Failed to create game session. Please try again."
+      );
       setIsSubmitting(false);
     }
   };
+
+  // Show error message from context if available
+  useEffect(() => {
+    if (contextError) {
+      setApiError(contextError);
+    }
+  }, [contextError]);
 
   return (
     <div className="modalOverlay">
@@ -286,6 +282,12 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                 {errors.genres && (
                   <div className="errorMessage">{errors.genres}</div>
                 )}
+                {formData.genres.length > 0 && (
+                  <div className="apiNote">
+                    Note: The current API only supports the first genre, but all
+                    will be stored locally.
+                  </div>
+                )}
               </div>
 
               {/* Game Platforms - Multiple Selection */}
@@ -354,6 +356,12 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                 {errors.platforms && (
                   <div className="errorMessage">{errors.platforms}</div>
                 )}
+                {formData.platforms.length > 0 && (
+                  <div className="apiNote">
+                    Note: The current API only supports the first platform, but
+                    all will be stored locally.
+                  </div>
+                )}
               </div>
 
               {/* Game Regions - Multiple Selection */}
@@ -419,6 +427,12 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                 )}
                 {errors.regions && (
                   <div className="errorMessage">{errors.regions}</div>
+                )}
+                {formData.regions.length > 0 && (
+                  <div className="apiNote">
+                    Note: The current API only supports the first region, but
+                    all will be stored locally.
+                  </div>
                 )}
               </div>
 
@@ -486,6 +500,12 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                     })}
                   </div>
                 )}
+                {formData.customTags.length > 0 && (
+                  <div className="apiNote">
+                    Note: The current API only supports the first tag, but all
+                    will be stored locally.
+                  </div>
+                )}
               </div>
             </div>
 
@@ -516,7 +536,7 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
                   value={formData.playersNeeded}
                   onChange={handleInputChange}
                   placeholder="#Of Players Needed"
-                  min="2"
+                  min="1"
                   max="100"
                   className={errors.playersNeeded ? "error" : ""}
                 />
