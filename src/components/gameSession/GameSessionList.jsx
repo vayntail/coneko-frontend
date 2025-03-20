@@ -46,7 +46,14 @@ const GameSessionList = () => {
           key={gameSession._id || gameSession.id}
           className="game-session-item"
         >
-          <GameSessionCard game={gameSession} />
+          <GameSessionCard
+            key={gameSession.id}
+            game={{
+              ...gameSession,
+              playersNeeded: 6, // Always 6 Slots
+              currentPlayers: gameSession.currentPlayers || 1, // At least the creator
+            }}
+          />
         </li>
       ))}
     </ul>

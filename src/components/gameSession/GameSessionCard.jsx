@@ -44,7 +44,17 @@ const GameSessionCard = (props) => {
           <h2>{game.gameTitle || "Untitled Game"}</h2>
           <p>{game.requestDescription || "No description available"}</p>
           <div className="user-circles">
-            <UserCircle user={game.user || ""} />
+            {/* Generate circles based on playersNeeded (maximum capacity) */}
+            {Array.from({ length: props.game.playersNeeded || 0 }).map(
+              (_, index) => (
+                <UserCircle
+                  key={index}
+                  isCreator={index === 0} // First circle is always the creator
+                  isFilled={index < (props.game.currentPlayers || 1)} // Fill based on current player count
+                  user={index === 0 ? props.game.user : ""} // Only creator has user info for now
+                />
+              )
+            )}
           </div>
         </div>
       </div>
