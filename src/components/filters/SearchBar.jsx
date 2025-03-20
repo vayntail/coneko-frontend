@@ -54,6 +54,13 @@ const SearchBar = () => {
     setSearchTerm(""); //Clear the actual search term
   };
 
+  // Handle search button click
+  //Only needed if someone has unrelastic typing speed
+  const handleSearch = () => {
+    // Immediately apply the current input value as search term
+    setSearchTerm(inputValue);
+  };
+
   return (
     <div className="searchBarContainer">
       {/* Search input field */}
@@ -76,8 +83,14 @@ const SearchBar = () => {
           ❌
         </button>
       )}
+
       {/* Search icon button */}
-      <button className="searchBtn" aria-label="Search">
+      <button
+        className="searchBtn"
+        onClick={handleSearch}
+        aria-label="Search"
+        title="Search"
+      >
         🔍
       </button>
     </div>

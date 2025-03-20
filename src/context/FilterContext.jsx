@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { gameSessionsAPI } from "../utils/api";
 
 // Mock Data, replace when backEnd API is running
 import {
@@ -43,33 +44,162 @@ export const FilterProvider = ({ children }) => {
   //State for loading status
   const [isLoading, setIsLoading] = useState(true);
 
-  //Load Mock game session data
+  //State for Errors
+  const [error, setError] = useState(null);
+
+  // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+  // Add localStorage sessions state
+  const [localSessions, setLocalSessions] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("localSessions")) || [];
+    } catch (e) {
+      console.error("Error loading local sessions:", e);
+      return [];
+    }
+  });
+  // ==============================================================================================
+
+  // Fetch game sessions from API
   useEffect(() => {
-    // (Todo replace with backend API)
-    const loadMockData = async () => {
+    const fetchSessions = async () => {
       try {
         setIsLoading(true);
+        setError(null);
 
-        //import Mock game session data
-        const module = await import("../assets/mockData/gameSessions");
-        const sessions = module.default;
+        const sessions = await gameSessionsAPI.getAllSessions();
+        console.log("API Response:", sessions);
 
-        setAllSessions(sessions);
-        setFilteredSessions(sessions); //Start with all sessions
+        // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+        // Check if the response is an array
+        let apiSessions = [];
+        if (Array.isArray(sessions) && sessions.length > 0) {
+          apiSessions = sessions;
+        } else {
+          console.warn(
+            "API did not return valid session data. Using empty array."
+          );
+        }
+
+        // Combine API sessions with localStorage sessions
+        const combinedSessions = [
+          ...apiSessions,
+          ...localSessions.map((session) => ({
+            ...session,
+            isLocalOnly: true,
+          })),
+        ];
+
+        setAllSessions(combinedSessions);
+        setFilteredSessions(combinedSessions);
+        // ==============================================================================================
 
         setIsLoading(false);
       } catch (error) {
-        console.error(`Failed to load mock data`, error);
+        console.error("Failed to fetch sessions:", error);
+
+        // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+        // Use local sessions when API fails
+        if (localSessions.length > 0) {
+          console.log(
+            "Using local sessions due to API error:",
+            localSessions.length
+          );
+          setAllSessions(localSessions);
+          setFilteredSessions(localSessions);
+          setError("API unavailable. Showing locally stored sessions.");
+        } else {
+          // ==============================================================================================
+          setError("Failed to load game sessions. Please try again later");
+          // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+        }
+        // ==============================================================================================
+
         setIsLoading(false);
       }
     };
 
-    loadMockData();
-  }, []);
+    fetchSessions();
+    // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+  }, [localSessions]); // Add localSessions as dependency
+  // ==============================================================================================
+
+  /**
+   * Function to apply all filters to the sessions
+   * This runs whenever any filter criteria changes (Another option is chosen or removed)
+   */
+
+  //applyFilters function
+  const applyFilters = () => {
+    if (allSessions.length === 0) return;
+
+    let results = [...allSessions];
+
+    // Filter by platforms
+    if (platforms.length > 0) {
+      results = results.filter((session) =>
+        platforms.includes(session.platform)
+      );
+    }
+
+    // Filter by genres
+    if (genres.length > 0) {
+      results = results.filter((session) => genres.includes(session.gameGenre));
+    }
+
+    // Filter by regions
+    if (regions.length > 0) {
+      results = results.filter((session) =>
+        regions.includes(session.gameRegion)
+      );
+    }
+
+    // Filter by custom tags
+    if (customTags.length > 0) {
+      results = results.filter((session) =>
+        customTags.includes(session.customTags)
+      );
+    }
+
+    // Filter by group size
+    if (groupSize) {
+      results = results.filter((session) => {
+        const maxCapacity = session.playersNeeded;
+
+        switch (groupSize) {
+          case "any":
+            return true;
+          case "small":
+            return maxCapacity <= 2;
+          case "medium":
+            return maxCapacity > 2 && maxCapacity <= 5;
+          case "large":
+            return maxCapacity > 5;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      results = results.filter(
+        (session) =>
+          (session.gameTitle &&
+            session.gameTitle.toLowerCase().includes(term)) ||
+          (session.requestDescription &&
+            session.requestDescription.toLowerCase().includes(term))
+      );
+    }
+
+    setFilteredSessions(results);
+  };
 
   //Apply filters whenever any filter changes
   useEffect(() => {
-    applyFilters();
+    if (allSessions.length > 0) {
+      applyFilters();
+    }
   }, [
     platforms,
     genres,
@@ -80,89 +210,6 @@ export const FilterProvider = ({ children }) => {
     allSessions,
   ]);
 
-  /**
-   * Function to apply all filters to the sessions
-   * This runs whenever any filter criteria changes (Another option is chosen or removed)
-   */
-
-  const applyFilters = () => {
-    //If no data loaded yet, do nothing
-    if (allSessions.length === 0) return;
-
-    //Start with all sessions
-    let results = [...allSessions];
-
-    //Filter by platforms - if any platforms are selected
-    if (platforms.length > 0) {
-      results = results.filter((session) =>
-        platforms.includes(session.platform)
-      );
-    }
-
-    // Filter by genres - if any genres are selected
-    // A session matches if it has ANY of the selected genres
-    if (genres.length > 0) {
-      results = results.filter(
-        (session) =>
-          // Check if any of the selected genres are in the session's genres array
-          session.genres &&
-          genres.some((genre) => session.genres.includes(genre))
-      );
-    }
-
-    // Filter by regions - if any regions are selected
-    if (regions.length > 0) {
-      results = results.filter((session) => regions.includes(session.region));
-    }
-
-    // Filter by custom tags - if any custom tags are selected
-    // A session matches if it has ANY of the selected custom tags
-    if (customTags.length > 0) {
-      results = results.filter(
-        (session) =>
-          session.customTags &&
-          customTags.some((tag) => session.customTags.includes(tag))
-      );
-    }
-
-    // Filter by group size - if a group size is selected
-    if (groupSize) {
-      results = results.filter((session) => {
-        // Get the maximum player capacity
-        const maxCapacity = session.maxPlayers;
-
-        // Apply different filters based on group size selection
-        switch (groupSize) {
-          case "any":
-            return true; // Match everything
-          case "small":
-            return maxCapacity <= 2; // For small groups (1-2 players)
-          case "medium":
-            return maxCapacity > 2 && maxCapacity <= 5; // For medium groups (2-5 players)
-          case "large":
-            return maxCapacity > 5; // For large groups (5+ players)
-          default:
-            return true;
-        }
-      });
-    }
-
-    // Filter by search term - if a search term is entered
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase().trim();
-      results = results.filter(
-        (session) =>
-          // Search in title and description
-          (session.title && session.title.toLowerCase().includes(term)) ||
-          (session.description &&
-            session.description.toLowerCase().includes(term))
-      );
-    }
-
-    // Update the filtered sessions state
-    setFilteredSessions(results);
-  };
-
   // Function to reset all filters to their default state
   const resetFilters = () => {
     setPlatforms([]);
@@ -172,6 +219,45 @@ export const FilterProvider = ({ children }) => {
     setCustomTags([]);
     setSearchTerm("");
   };
+
+  //Refreshes data from the API
+  const refreshSessions = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const sessions = await gameSessionsAPI.getAllSessions();
+      setAllSessions(sessions);
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Failed to refresh sessions:", error);
+      setError("Failed to refresh game sessions. Please try again later.");
+      setIsLoading(false);
+    }
+  };
+
+  // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+  // Add function to create local sessions
+  const createLocalSession = (sessionData) => {
+    const newSession = {
+      ...sessionData,
+      id: `local-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      isLocalOnly: true,
+    };
+
+    const updatedSessions = [...localSessions, newSession];
+    setLocalSessions(updatedSessions);
+    localStorage.setItem("localSessions", JSON.stringify(updatedSessions));
+
+    // Update allSessions and filtered sessions
+    setAllSessions((prev) => [...prev, newSession]);
+    setFilteredSessions((prev) => [...prev, newSession]);
+
+    return newSession;
+  };
+  // ==============================================================================================
 
   // Create the value object that will be provided to components
   const contextValue = {
@@ -200,9 +286,15 @@ export const FilterProvider = ({ children }) => {
     allSessions,
     filteredSessions,
     isLoading,
+    error,
 
     // Reset function
     resetFilters,
+    refreshSessions,
+
+    // ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ==============================
+    createLocalSession,
+    // ==============================================================================================
   };
 
   // Return the Provider component with the context value

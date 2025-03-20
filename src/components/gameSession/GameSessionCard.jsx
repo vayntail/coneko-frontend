@@ -6,42 +6,54 @@ import leaderIcon from "../../assets/placeholders/leader.webp"; // Crown Icon Le
 const GameSessionCard = (props) => {
   const onJoinButtonClick = () => {
     console.log("JOINED!");
+    // Here you'd implement the join functionality with the API
   };
+
+  // Safely get the game object, ensure it exists
+  const game = props.game || {};
 
   return (
     <div className="card flex-horizontal">
+      {/* ============================== TEMPORARY LOCALSTORAGE IMPLEMENTATION ============================== */}
+      {game.isLocalOnly && <div className="local-badge">Local</div>}
+      {/* ============================================================================================== */}
+
       <div className="flex-horizontal">
         <div className="filter-icons">
-          <div>{props.game.platform}</div>
-          <div> {props.game.region}</div>
+          {/* Display platform */}
+          <div>{game.platform || "Unknown"}</div>
 
-          {props.game.genres.map((genre) => (
-            <div>{genre}</div>
-          ))}
+          {/* Display region */}
+          <div>{game.gameRegion || "Unknown"}</div>
+
+          {/* Display genre */}
+          <div>{game.gameGenre || "Unknown"}</div>
         </div>
-        {props.game.img ? (
-          /* check if game img exists */ <img
-            className="game-img"
-            src={props.game.img}
-          />
+
+        {/* Check if game img exists */}
+        {game.gameImage ? (
+          <img className="game-img" src={game.gameImage} alt={game.gameTitle} />
         ) : (
-          <img className="game-img" src={placeholderImg} />
+          <img
+            className="game-img"
+            src={placeholderImg}
+            alt="Game placeholder"
+          />
         )}
 
         <div className="mid-box">
-          <h2>{props.game.title}</h2>
-          <p>{props.game.description}</p>
-          <div className="user-circles horizontal-layout">
-            {props.game.currentPlayers.map((player, index) =>
-              player.isLeader ? (
-                <img
+          <h2>{game.gameTitle || "Untitled Game"}</h2>
+          <p>{game.requestDescription || "No description available"}</p>
+          <div className="user-circles">
+            {/* Generate circles based on playersNeeded (maximum capacity) */}
+            {Array.from({ length: props.game.playersNeeded || 0 }).map(
+              (_, index) => (
+                <UserCircle
                   key={index}
-                  src={leaderIcon}
-                  alt="Leader Crown"
-                  className="user-icon"
+                  isCreator={index === 0} // First circle is always the creator
+                  isFilled={index < (props.game.currentPlayers || 1)} // Fill based on current player count
+                  user={index === 0 ? props.game.user : ""} // Only creator has user info for now
                 />
-              ) : (
-                <UserCircle key={index} user={player} />
               )
             )}
           </div>
@@ -49,9 +61,14 @@ const GameSessionCard = (props) => {
       </div>
 
       <div className="join-box">
-        <p>{props.game.scheduledTime}</p>
         <p>
-          {props.game.currentPlayers}/{props.game.maxPlayers}
+          {game.scheduledTime
+            ? new Date(game.scheduledTime).toLocaleString()
+            : "No time specified"}
+        </p>
+        <p>
+          {/* Display current/max players */}
+          1/{game.playersNeeded || 0}
         </p>
         <button onClick={onJoinButtonClick}>Join</button>
       </div>
