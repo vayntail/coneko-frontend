@@ -44,19 +44,31 @@ const GameSessionCard = (props) => {
         <div className="mid-box">
           <h2>{game.gameTitle || "Untitled Game"}</h2>
           <p>{game.requestDescription || "No description available"}</p>
+
+          {/* ============================== USER ICONS SECTION  Lenny ============================== */}
           <div className="user-circles">
-            {/* Generate circles based on playersNeeded (maximum capacity) */}
-            {Array.from({ length: props.game.playersNeeded || 0 }).map(
+            {/* Creator Slot Always First */}
+            <UserCircle user={{ isCreator: true }} />
+
+            {/* Dynamically Show Only the Number of Requested Player Slots */}
+            {[...Array(Math.min(props.game.playersNeeded - 1, 5))].map(
               (_, index) => (
                 <UserCircle
                   key={index}
-                  isCreator={index === 0} // First circle is always the creator
-                  isFilled={index < (props.game.currentPlayers || 1)} // Fill based on current player count
-                  user={index === 0 ? props.game.user : ""} // Only creator has user info for now
+                  user={{
+                    isSelected: index < (props.game.currentPlayers || 0),
+                  }}
                 />
               )
             )}
+
+            {/* Show '+' Symbol for Extra Players Beyond 6 */}
+            {props.game.currentPlayers > 6 && (
+              <span className="extra-players">+</span>
+            )}
           </div>
+
+          {/* ================================================================================== */}
         </div>
       </div>
 

@@ -1,25 +1,54 @@
 import "./UserCircle.scss";
 import userImg from "../../assets/placeholders/user-img.png";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleUser } from "@fortawesome/free-solid-svg-icons";
-import leaderIcon from "../../assets/placeholders/leader.webp"; // Updated Path
+import creatorImg from "../../assets/placeholders/isCreator.png"; // Creator Crown Image Lenny
+import { useState } from "react";
 
-const UserCircle = ({ user }) => {
-  const renderIcon = () => {
-    if (user.isLeader) {
-      return <img src={leaderIcon} alt="Leader Icon" className="crown-icon" />;
+const UserCircle = ({ user, onSelect }) => {
+  const [isSelected, setIsSelected] = useState(user.isSelected || false);
+
+  const handleClick = () => {
+    if (!user.isCreator) {
+      const newSelection = !isSelected;
+      setIsSelected(newSelection);
+      if (onSelect) {
+        onSelect(newSelection); // Update parent state
+      }
     }
-    return (
-      <FontAwesomeIcon
-        icon={faCircleUser}
-        style={{
-          color: user.isSelected ? "#967ce4" : "#0a78cd", // Purple for selected, Blue for empty
-        }}
-      />
-    );
+  };
+  //.........................Lenny circle style tooltips ...//
+  const circleStyle = {
+    height: "50px",
+    width: "50px",
+    borderRadius: "50%",
+    backgroundColor: isSelected ? "#333" : "#0a78cd", // Dark Grey on Select
+    cursor: !user.isCreator ? "pointer" : "default",
+    position: "relative", // Required for Tooltip
   };
 
-  return <div className="user-circle">{renderIcon()}</div>;
+  // Tooltip Logic
+  const tooltipText = user.isCreator
+    ? "Creator"
+    : user.isSelected
+    ? `Player ${user.playerNumber}`
+    : "Empty Slot";
+
+  return (
+    <div
+      className="user-circle"
+      style={circleStyle}
+      onClick={handleClick}
+      data-tooltip={tooltipText} // Tooltip Logic
+    >
+      <img
+        src={user.isCreator ? creatorImg : userImg}
+        alt={tooltipText}
+        style={{ width: "100%", height: "100%" }}
+      />
+      {/* Tooltip Display */}
+      <div className="tooltip">{tooltipText}</div>
+    </div>
+    //...............Lenny circle style tooltips ...//
+  );
 };
 
 export default UserCircle;
