@@ -46,20 +46,27 @@ const GameSessionCard = (props) => {
 
           {/* ============================== USER ICONS SECTION ============================== */}
           <div className="user-circles">
-            {/* Crown Icon in First Slot - Always the Creator */}
+            {/* Creator Slot Always First */}
             <UserCircle user={{ isCreator: true }} />
 
-            {/* Exactly 5 Regular User Icons for Slots */}
-            {[...Array(5)].map((_, index) => (
-              <UserCircle key={index} user={{ isSelected: false }} />
-            ))}
+            {/* Dynamically Show Only the Number of Requested Player Slots */}
+            {[...Array(Math.min(props.game.playersNeeded - 1, 5))].map(
+              (_, index) => (
+                <UserCircle
+                  key={index}
+                  user={{
+                    isSelected: index < (props.game.currentPlayers || 0),
+                  }}
+                />
+              )
+            )}
 
-            {/* + Symbol for Extra Players */}
-            {props.game.currentPlayers &&
-              props.game.currentPlayers.length > 6 && (
-                <span className="extra-players">+</span>
-              )}
+            {/* Show '+' Symbol for Extra Players Beyond 6 */}
+            {props.game.currentPlayers > 6 && (
+              <span className="extra-players">+</span>
+            )}
           </div>
+
           {/* ================================================================================== */}
         </div>
       </div>
