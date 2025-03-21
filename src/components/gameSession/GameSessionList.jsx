@@ -55,6 +55,7 @@ const GameSessionList = () => {
               currentPlayers: gameSession.currentPlayers || 1, // At least the creator
             }}
           />
+          {/* Pass the gameSession as a prop to GameSessionCard  Lenny */}
         </li>
       ))}
     </ul>
