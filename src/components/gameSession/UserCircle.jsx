@@ -1,6 +1,6 @@
 import "./UserCircle.scss";
 import userImg from "../../assets/placeholders/user-img.png";
-import creatorImg from "../../assets/placeholders/isCreator.png"; // Creator Crown
+import creatorImg from "../../assets/placeholders/isCreator.png"; // Creator Crown Image Lenny
 import { useState } from "react";
 
 const UserCircle = ({ user, onSelect }) => {
@@ -15,7 +15,7 @@ const UserCircle = ({ user, onSelect }) => {
       }
     }
   };
-
+  //.........................Lenny circle style tooltips ...//
   const circleStyle = {
     height: "50px",
     width: "50px",
@@ -47,6 +47,7 @@ const UserCircle = ({ user, onSelect }) => {
       {/* Tooltip Display */}
       <div className="tooltip">{tooltipText}</div>
     </div>
+    //...............Lenny circle style tooltips ...//
   );
 };
 

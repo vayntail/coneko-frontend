@@ -44,7 +44,7 @@ const GameSessionCard = (props) => {
           <h2>{game.gameTitle || "Untitled Game"}</h2>
           <p>{game.requestDescription || "No description available"}</p>
 
-          {/* ============================== USER ICONS SECTION ============================== */}
+          {/* ============================== USER ICONS SECTION  Lenny ============================== */}
           <div className="user-circles">
             {/* Creator Slot Always First */}
             <UserCircle user={{ isCreator: true }} />

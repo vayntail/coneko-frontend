@@ -46,6 +46,7 @@ const GameSessionList = () => {
           key={gameSession._id || gameSession.id}
           className="game-session-item"
         >
+          {/* Pass the gameSession as a prop to GameSessionCard  Lenny */}
           <GameSessionCard
             key={gameSession.id}
             game={{
