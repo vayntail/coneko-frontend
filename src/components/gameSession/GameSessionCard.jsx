@@ -1,6 +1,7 @@
 import "./GameCard.scss";
 import placeholderImg from "../../assets/placeholders/placeholder-img.png";
 import UserCircle from "./UserCircle";
+import leaderIcon from "../../assets/placeholders/leader.webp"; // Crown Icon Lenny
 
 const GameSessionCard = (props) => {
   const onJoinButtonClick = () => {
@@ -43,9 +44,31 @@ const GameSessionCard = (props) => {
         <div className="mid-box">
           <h2>{game.gameTitle || "Untitled Game"}</h2>
           <p>{game.requestDescription || "No description available"}</p>
+
+          {/* ============================== USER ICONS SECTION  Lenny ============================== */}
           <div className="user-circles">
-            <UserCircle user={game.user || ""} />
+            {/* Creator Slot Always First */}
+            <UserCircle user={{ isCreator: true }} />
+
+            {/* Dynamically Show Only the Number of Requested Player Slots */}
+            {[...Array(Math.min(props.game.playersNeeded - 1, 5))].map(
+              (_, index) => (
+                <UserCircle
+                  key={index}
+                  user={{
+                    isSelected: index < (props.game.currentPlayers || 0),
+                  }}
+                />
+              )
+            )}
+
+            {/* Show '+' Symbol for Extra Players Beyond 6 */}
+            {props.game.currentPlayers > 6 && (
+              <span className="extra-players">+</span>
+            )}
           </div>
+
+          {/* ================================================================================== */}
         </div>
       </div>
 
