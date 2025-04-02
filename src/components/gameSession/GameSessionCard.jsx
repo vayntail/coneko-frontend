@@ -1,7 +1,7 @@
 import "./GameCard.scss";
 import placeholderImg from "../../assets/placeholders/placeholder-img.png";
 import UserCircle from "./UserCircle";
-import leaderIcon from "../../assets/placeholders/leader.webp"; // Crown Icon Lenny
+import creatorImg from "../../assets/placeholders/isCreator.png"; // Crown Icon Lenny
 
 const GameSessionCard = (props) => {
   const onJoinButtonClick = () => {
@@ -47,23 +47,20 @@ const GameSessionCard = (props) => {
 
           {/* ============================== USER ICONS SECTION  Lenny ============================== */}
           <div className="user-circles">
-            {/* Creator Slot Always First */}
-            <UserCircle user={{ isCreator: true }} />
+            {/* Generate circles based on playersNeeded (maximum capacity) */}
+            {Array.from({ length: game.playersNeeded || 0 }).map((_, index) => (
+              <UserCircle
+                key={index}
+                user={{
+                  isCreator: index === 0,
+                  isSelected: index < (game.currentPlayers?.length || 1),
+                  playerNumber: index + 1,
+                }}
+              />
+            ))}
 
-            {/* Dynamically Show Only the Number of Requested Player Slots */}
-            {[...Array(Math.min(props.game.playersNeeded - 1, 5))].map(
-              (_, index) => (
-                <UserCircle
-                  key={index}
-                  user={{
-                    isSelected: index < (props.game.currentPlayers || 0),
-                  }}
-                />
-              )
-            )}
-
-            {/* Show '+' Symbol for Extra Players Beyond 6 */}
-            {props.game.currentPlayers > 6 && (
+            {/* + Icon if more actual players exist than shown visually */}
+            {game.currentPlayers?.length > game.playersNeeded && (
               <span className="extra-players">+</span>
             )}
           </div>

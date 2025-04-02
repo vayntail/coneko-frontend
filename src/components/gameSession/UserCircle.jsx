@@ -39,11 +39,7 @@ const UserCircle = ({ user, onSelect }) => {
       onClick={handleClick}
       data-tooltip={tooltipText} // Tooltip Logic
     >
-      <img
-        src={user.isCreator ? creatorImg : userImg}
-        alt={tooltipText}
-        style={{ width: "100%", height: "100%" }}
-      />
+      <img src={user.isCreator ? creatorImg : userImg} alt={tooltipText} />
       {/* Tooltip Display */}
       <div className="tooltip">{tooltipText}</div>
     </div>
