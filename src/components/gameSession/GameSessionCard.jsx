@@ -3,14 +3,19 @@ import placeholderImg from "../../assets/placeholders/placeholder-img.png";
 import UserCircle from "./UserCircle";
 import creatorImg from "../../assets/placeholders/isCreator.png"; // Crown Icon Lenny
 
+import { useState } from "react"; // ⬅️ ADD THIS
+
 const GameSessionCard = (props) => {
+  const [hasJoined, setHasJoined] = useState(false); //
   const onJoinButtonClick = () => {
     console.log("JOINED!");
+    setHasJoined(true); // Set hasJoined to true when the join button is clicked (LT)
     // Here you'd implement the join functionality with the API
   };
 
   // Safely get the game object, ensure it exists
   const game = props.game || {};
+  game.currentPlayers = game.currentPlayers || 1;
 
   return (
     <div className="card flex-horizontal">
@@ -47,24 +52,22 @@ const GameSessionCard = (props) => {
 
           {/* ============================== USER ICONS SECTION  Lenny ============================== */}
           <div className="user-circles">
-            {/* Generate circles based on playersNeeded (maximum capacity) */}
-            {Array.from({ length: game.playersNeeded || 0 }).map((_, index) => (
+            {Array.from({ length: game.playersNeeded || 1 }).map((_, index) => (
               <UserCircle
                 key={index}
                 user={{
                   isCreator: index === 0,
-                  isSelected: index < (game.currentPlayers?.length || 1),
+                  isSelected: index < (game.currentPlayers || 1),
                   playerNumber: index + 1,
                 }}
               />
             ))}
 
-            {/* + Icon if more actual players exist than shown visually */}
-            {game.currentPlayers?.length > game.playersNeeded && (
-              <span className="extra-players">+</span>
+            {/* + icon if more than playersNeeded */}
+            {game.currentPlayers > game.playersNeeded && (
+              <div className="extra-players">+</div>
             )}
           </div>
-
           {/* ================================================================================== */}
         </div>
       </div>
@@ -80,6 +83,14 @@ const GameSessionCard = (props) => {
           1/{game.playersNeeded || 0}
         </p>
         <button onClick={onJoinButtonClick}>Join</button>
+
+        {/* Join Click button Lenny */}
+        <button
+          onClick={onJoinButtonClick}
+          className={hasJoined ? "joined-button" : "join-button"}
+        >
+          {hasJoined ? "Joined ✅" : "Join"}
+        </button>
       </div>
     </div>
   );

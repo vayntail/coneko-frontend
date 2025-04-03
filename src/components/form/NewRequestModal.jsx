@@ -165,9 +165,12 @@ const NewRequestModal = ({ isOpen, onClose, onSessionCreated }) => {
         console.log("Session created locally:", newSession);
       }
 
-      // Notify parent component
+      // Notify parent component ////(LT)///
       if (onSessionCreated) {
-        onSessionCreated(newSession);
+        onSessionCreated({
+          ...newSession,
+          currentPlayers: [{ isCreator: true, isSelected: false }],
+        });
       }
       // ==============================================================================================
 

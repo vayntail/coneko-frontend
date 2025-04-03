@@ -1,6 +1,23 @@
 import { useEffect, useState } from "react";
 import GameSessionForm from "./HomeForm";
 import "../pages/Home/Home.css";
+
+//  ROTATING SLOGAN HOOKS
+const slogans = [
+  "Ready up! It's game time!",
+  "Squad up and jump in!",
+  "Find your perfect team today.",
+];
+const [currentSlogan, setCurrentSlogan] = useState(0);
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentSlogan((prev) => (prev + 1) % slogans.length);
+  }, 5000);
+  return () => clearInterval(interval);
+}, []);
+//  ROTATING SLOGAN HOOKS END
+
 export default () => {
   const [gameSessions, setGameSessions] = useState([]);
 
@@ -12,6 +29,10 @@ export default () => {
   return (
     <div className="Home">
       <GameSessionForm />
+
+      {/*  SLOGAN DISPLAY GOES HERE */}
+      <h2 className="daily-slogan">{slogans[currentSlogan]}</h2>
+      {/*  END SLOGAN DISPLAY */}
 
       <div className="TestList">
         <h2>Saved Sessions</h2> <br />

@@ -22,7 +22,24 @@
   .join-box {
     width: 200px;
   }
-
+  /////////////////////////////////
+  .join-button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .joined-button {
+    background-color: #aaa;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: not-allowed;
+  }
+  ////////////////////////////////////
   button {
     width: 75px;
     padding: 10px;
