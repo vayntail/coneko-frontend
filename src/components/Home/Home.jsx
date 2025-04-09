@@ -33,6 +33,10 @@ export default () => {
       {/*  SLOGAN DISPLAY GOES HERE */}
       <h2 className="daily-slogan">{slogans[currentSlogan]}</h2>
       {/*  END SLOGAN DISPLAY */}
+      {/*just for demo purposes*/}
+      <button onClick={() => localStorage.clear()}>
+        🧹 Clear LocalStorage
+      </button>
 
       <div className="TestList">
         <h2>Saved Sessions</h2> <br />

@@ -14,9 +14,12 @@
     width: 100px;
     object-fit: cover;
   }
-
   .user-circles {
-    height: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px;
+    padding-top: 10px;
   }
 
   .join-box {

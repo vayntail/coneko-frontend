@@ -1,19 +1,23 @@
+// ================================
+// 📍 Update Join Button Feedback (Join/Unjoin Toggle)
+// ================================
+// In GameSessionCard.jsx:
+
+import React, { useState } from "react";
 import "./GameCard.scss";
 import placeholderImg from "../../assets/placeholders/placeholder-img.png";
 import UserCircle from "./UserCircle";
 import creatorImg from "../../assets/placeholders/isCreator.png"; // Crown Icon Lenny
 
-import { useState } from "react"; // ⬅️ ADD THIS
-
 const GameSessionCard = (props) => {
-  const [hasJoined, setHasJoined] = useState(false); //
+  const [hasJoined, setHasJoined] = useState(false);
+
   const onJoinButtonClick = () => {
-    console.log("JOINED!");
-    setHasJoined(true); // Set hasJoined to true when the join button is clicked (LT)
-    // Here you'd implement the join functionality with the API
+    setHasJoined((prev) => !prev); // Toggle join/unjoin
+    console.log(hasJoined ? "LEFT SESSION" : "JOINED SESSION!");
+    // Here you'd implement join/leave API logic or localStorage handling
   };
 
-  // Safely get the game object, ensure it exists
   const game = props.game || {};
   game.currentPlayers = game.currentPlayers || 1;
 
@@ -35,7 +39,6 @@ const GameSessionCard = (props) => {
           <div>{game.gameGenre || "Unknown"}</div>
         </div>
 
-        {/* Check if game img exists */}
         {game.gameImage ? (
           <img className="game-img" src={game.gameImage} alt={game.gameTitle} />
         ) : (
@@ -57,7 +60,7 @@ const GameSessionCard = (props) => {
                 key={index}
                 user={{
                   isCreator: index === 0,
-                  isSelected: index < (game.currentPlayers || 1),
+                  isSelected: hasJoined && index !== 0, // Show selected if joined
                   playerNumber: index + 1,
                 }}
               />
@@ -80,16 +83,16 @@ const GameSessionCard = (props) => {
         </p>
         <p>
           {/* Display current/max players */}
-          1/{game.playersNeeded || 0}
+          {Array.isArray(game.currentPlayers)
+            ? game.currentPlayers.length
+            : game.currentPlayers}
+          /{game.playersNeeded || 0}
         </p>
-        <button onClick={onJoinButtonClick}>Join</button>
-
-        {/* Join Click button Lenny */}
         <button
           onClick={onJoinButtonClick}
           className={hasJoined ? "joined-button" : "join-button"}
         >
-          {hasJoined ? "Joined ✅" : "Join"}
+          {hasJoined ? "Leave Room" : "Join Room"}
         </button>
       </div>
     </div>
